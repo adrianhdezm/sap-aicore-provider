@@ -35,7 +35,8 @@
     "exports:check": "attw --pack . --ignore-rules=cjs-resolves-to-esm",
     "lint": "tsc",
     "test": "vitest run",
-    "ci:check": "npm run build && npm run format && npm run exports:check && npm run lint && npm run test"
+    "ci:check": "npm run build && npm run format && npm run exports:check && npm run lint && npm run test",
+    "release": "./scripts/release.sh"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.2",
