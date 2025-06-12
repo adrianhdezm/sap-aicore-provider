@@ -49,10 +49,13 @@ createSapAiCore({
   tokenService: {
     tokenEndpoint: 'https://auth.example.com/token',
     clientId: 'your-client-id',
-    clientSecret: 'your-client-secret'
+    clientSecret: 'your-client-secret',
+    cacheMaxAgeMs: 3600000 // optional token cache duration (default 1h)
   }
 });
 ```
+
+Tokens are cached for one hour by default to reduce token service requests.
 
 ## License
 

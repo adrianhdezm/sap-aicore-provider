@@ -128,5 +128,32 @@ describe('chat', () => {
 
       expect(server.calls[1]!.requestHeaders.authorization).toBe('Bearer token123');
     });
+
+    it('should cache tokens to avoid repeated fetches', async () => {
+      prepareTokenResponse('token123');
+      const provider = createSapAiCore({
+        baseURL: BASE_URL,
+        apiKey: 'test-api-key',
+        tokenService: {
+          tokenEndpoint: TOKEN_URL,
+          clientId: 'id',
+          clientSecret: 'secret',
+          cacheMaxAgeMs: 1000
+        }
+      });
+
+      await provider('test-deployment').doGenerate({
+        inputFormat: 'prompt',
+        mode: { type: 'regular' },
+        prompt: TEST_PROMPT
+      });
+      await provider('test-deployment').doGenerate({
+        inputFormat: 'prompt',
+        mode: { type: 'regular' },
+        prompt: TEST_PROMPT
+      });
+
+      expect(server.calls.length).toBe(3);
+    });
   });
 });
