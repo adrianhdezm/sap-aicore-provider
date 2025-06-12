@@ -155,5 +155,29 @@ describe('chat', () => {
 
       expect(server.calls.length).toBe(3);
     });
+
+    it('should load token provider config from environment variables', async () => {
+      prepareTokenResponse('envToken');
+      process.env.TOKEN_PROVIDER_ENDPOINT = TOKEN_URL;
+      process.env.TOKEN_PROVIDER_CLIENT_ID = 'id';
+      process.env.TOKEN_PROVIDER_CLIENT_SECRET = 'secret';
+
+      const provider = createSapAiCore({
+        baseURL: BASE_URL,
+        apiKey: 'test-api-key'
+      });
+
+      await provider('test-deployment').doGenerate({
+        inputFormat: 'prompt',
+        mode: { type: 'regular' },
+        prompt: TEST_PROMPT
+      });
+
+      expect(server.calls[1]!.requestHeaders.authorization).toBe('Bearer envToken');
+
+      delete process.env.TOKEN_PROVIDER_ENDPOINT;
+      delete process.env.TOKEN_PROVIDER_CLIENT_ID;
+      delete process.env.TOKEN_PROVIDER_CLIENT_SECRET;
+    });
   });
 });

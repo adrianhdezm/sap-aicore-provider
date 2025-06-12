@@ -55,6 +55,11 @@ createSapAiCore({
 });
 ```
 
+Alternatively, provide these values using the `TOKEN_PROVIDER_ENDPOINT`,
+`TOKEN_PROVIDER_CLIENT_ID`, `TOKEN_PROVIDER_CLIENT_SECRET`,
+`TOKEN_PROVIDER_HEADER_NAME`, and `TOKEN_PROVIDER_CACHE_MAX_AGE_MS`
+environment variables.
+
 Tokens are cached for one hour by default to reduce token provider requests.
 
 ## License

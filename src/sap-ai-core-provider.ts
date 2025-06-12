@@ -2,6 +2,7 @@ import { OpenAICompatibleChatLanguageModel, type OpenAICompatibleChatSettings } 
 import type { LanguageModelV1 } from '@ai-sdk/provider';
 import { type FetchFunction, loadApiKey, loadSetting } from '@ai-sdk/provider-utils';
 import { createFetchWithToken, type TokenProviderConfig } from './lib/fetch-with-token-provider';
+import { loadObjectSetting } from './lib/load-object-setting';
 
 export type SapAiCoreModelId = 'sap-ai-core/gpt-4o' | 'sap-ai-core/gpt-4.1' | (string & {});
 
@@ -43,7 +44,39 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
     return url.toString();
   };
 
-  const fetch = options.tokenProvider ? createFetchWithToken(options.tokenProvider, options.fetch) : options.fetch;
+  let tokenProvider = options.tokenProvider;
+  if (!tokenProvider) {
+    const hasEnv =
+      typeof process !== 'undefined' &&
+      [
+        'TOKEN_PROVIDER_ENDPOINT',
+        'TOKEN_PROVIDER_CLIENT_ID',
+        'TOKEN_PROVIDER_CLIENT_SECRET',
+        'TOKEN_PROVIDER_HEADER_NAME',
+        'TOKEN_PROVIDER_CACHE_MAX_AGE_MS'
+      ].some((v) => process.env[v] != null);
+
+    if (hasEnv) {
+      tokenProvider = loadObjectSetting<TokenProviderConfig>({
+        settingValue: undefined,
+        environmentVariableMap: {
+          tokenEndpoint: 'TOKEN_PROVIDER_ENDPOINT',
+          clientId: 'TOKEN_PROVIDER_CLIENT_ID',
+          clientSecret: 'TOKEN_PROVIDER_CLIENT_SECRET',
+          headerName: 'TOKEN_PROVIDER_HEADER_NAME',
+          cacheMaxAgeMs: 'TOKEN_PROVIDER_CACHE_MAX_AGE_MS'
+        },
+        settingName: 'tokenProvider',
+        description: 'SAP AI Core Token Provider'
+      });
+
+      if (tokenProvider.cacheMaxAgeMs != null) {
+        tokenProvider.cacheMaxAgeMs = Number(tokenProvider.cacheMaxAgeMs);
+      }
+    }
+  }
+
+  const fetch = tokenProvider ? createFetchWithToken(tokenProvider, options.fetch) : options.fetch;
 
   const createChatModel = (modelId: SapAiCoreModelId, settings: OpenAICompatibleChatSettings = {}) =>
     new OpenAICompatibleChatLanguageModel(modelId, settings, {
