@@ -40,6 +40,20 @@ createSapAiCore({
 });
 ```
 
+Use `tokenService` to automatically fetch an access token before each request:
+
+```ts
+createSapAiCore({
+  baseURL: 'https://your-sap-ai-core-instance',
+  apiKey: 'your-api-key',
+  tokenService: {
+    tokenEndpoint: 'https://auth.example.com/token',
+    clientId: 'your-client-id',
+    clientSecret: 'your-client-secret'
+  }
+});
+```
+
 ## License
 
 MIT

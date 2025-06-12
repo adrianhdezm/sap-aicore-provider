@@ -1,12 +1,15 @@
 import type { LanguageModelV1Prompt } from '@ai-sdk/provider';
 import { createTestServer } from '@ai-sdk/provider-utils/test';
 import { createSapAiCore } from './sap-ai-core-provider';
+import { createFetchWithToken } from './fetch-with-token';
 import { describe, expect, it, beforeEach } from 'vitest';
 
 const TEST_PROMPT: LanguageModelV1Prompt = [{ role: 'user', content: [{ type: 'text', text: 'Hello' }] }];
 const BASE_URL = `https://test-resource.openai.azure.com/openai/deployments/test-deployment`;
+const TOKEN_URL = 'https://auth.example.com/token';
 const server = createTestServer({
-  [`${BASE_URL}/chat/completions`]: {}
+  [`${BASE_URL}/chat/completions`]: {},
+  [TOKEN_URL]: {}
 });
 function prepareJsonResponse({ content = '' }: { content?: string } = {}) {
   server.urls[`${BASE_URL}/chat/completions`].response = {
@@ -33,6 +36,13 @@ function prepareJsonResponse({ content = '' }: { content?: string } = {}) {
       },
       system_fingerprint: 'fp_3bc1b5746c'
     }
+  };
+}
+
+function prepareTokenResponse(token: string) {
+  server.urls[TOKEN_URL].response = {
+    type: 'json-value',
+    body: { access_token: token }
   };
 }
 
@@ -96,6 +106,27 @@ describe('chat', () => {
       });
 
       expect(server.calls[0]!.requestUrl).toStrictEqual(`${BASE_URL}/chat/completions?api-version=2025-03-01-preview`);
+    });
+
+    it('should add token from service to Authorization header', async () => {
+      prepareTokenResponse('token123');
+      const provider = createSapAiCore({
+        baseURL: BASE_URL,
+        apiKey: 'test-api-key',
+        tokenService: {
+          tokenEndpoint: TOKEN_URL,
+          clientId: 'id',
+          clientSecret: 'secret'
+        }
+      });
+
+      await provider('test-deployment').doGenerate({
+        inputFormat: 'prompt',
+        mode: { type: 'regular' },
+        prompt: TEST_PROMPT
+      });
+
+      expect(server.calls[1]!.requestHeaders.authorization).toBe('Bearer token123');
     });
   });
 });

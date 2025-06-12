@@ -1,6 +1,7 @@
 import { OpenAICompatibleChatLanguageModel, type OpenAICompatibleChatSettings } from '@ai-sdk/openai-compatible';
 import type { LanguageModelV1 } from '@ai-sdk/provider';
 import { type FetchFunction, loadApiKey, loadSetting } from '@ai-sdk/provider-utils';
+import { createFetchWithToken, type TokenServiceConfig } from './fetch-with-token';
 
 export type SapAiCoreModelId = 'sap-ai-core/gpt-4o' | 'sap-ai-core/gpt-4.1' | (string & {});
 
@@ -15,6 +16,7 @@ export interface SapAiCoreProviderSettings {
   headers?: Record<string, string>;
   fetch?: FetchFunction;
   apiVersion?: string;
+  tokenService?: TokenServiceConfig;
 }
 
 export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiCoreProvider {
@@ -41,12 +43,14 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
     return url.toString();
   };
 
+  const fetch = options.tokenService ? createFetchWithToken(options.tokenService, options.fetch) : options.fetch;
+
   const createChatModel = (modelId: SapAiCoreModelId, settings: OpenAICompatibleChatSettings = {}) =>
     new OpenAICompatibleChatLanguageModel(modelId, settings, {
       provider: 'sap-ai-core.chat',
       url,
       headers: getHeaders,
-      fetch: options.fetch,
+      fetch,
       supportsStructuredOutputs: true
     });
 
