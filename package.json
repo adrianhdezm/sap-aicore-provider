@@ -15,7 +15,6 @@
   "homepage": "https://github.com/adrianhdezm/sap-ai-core-provider#readme",
   "files": [
     "dist",
-    "dist",
     "README.md",
     "LICENSE",
     "package.json"
