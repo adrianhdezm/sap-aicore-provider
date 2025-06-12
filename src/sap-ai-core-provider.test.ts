@@ -1,7 +1,7 @@
 import type { LanguageModelV1Prompt } from '@ai-sdk/provider';
 import { createTestServer } from '@ai-sdk/provider-utils/test';
 import { createSapAiCore } from './sap-ai-core-provider';
-import { createFetchWithToken } from './fetch-with-token-provider';
+import { createFetchWithToken } from './lib/fetch-with-token-provider';
 import { describe, expect, it, beforeEach } from 'vitest';
 
 const TEST_PROMPT: LanguageModelV1Prompt = [{ role: 'user', content: [{ type: 'text', text: 'Hello' }] }];

@@ -1,7 +1,7 @@
 import { OpenAICompatibleChatLanguageModel, type OpenAICompatibleChatSettings } from '@ai-sdk/openai-compatible';
 import type { LanguageModelV1 } from '@ai-sdk/provider';
 import { type FetchFunction, loadApiKey, loadSetting } from '@ai-sdk/provider-utils';
-import { createFetchWithToken, type TokenServiceConfig } from './fetch-with-token-provider';
+import { createFetchWithToken, type TokenServiceConfig } from './lib/fetch-with-token-provider';
 
 export type SapAiCoreModelId = 'sap-ai-core/gpt-4o' | 'sap-ai-core/gpt-4.1' | (string & {});
 
