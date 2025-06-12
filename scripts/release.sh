@@ -57,7 +57,7 @@ fi
 
 # Stage and commit the version bump
 git add package.json package-lock.json
-git commit -m "Bump version to $new_version"
+git commit -m "chore(release): 🔧 Bump version to $new_version"
 
 # Push the commit and the tag to the remote repository (assuming main branch)
 git push origin main
