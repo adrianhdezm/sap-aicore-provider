@@ -46,7 +46,8 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
       provider: 'sap-ai-core.chat',
       url,
       headers: getHeaders,
-      fetch: options.fetch
+      fetch: options.fetch,
+      supportsStructuredOutputs: true
     });
 
   const provider = (modelId: SapAiCoreModelId, settings?: OpenAICompatibleChatSettings) => createChatModel(modelId, settings);
