@@ -114,7 +114,7 @@ describe('chat', () => {
         baseURL: BASE_URL,
         apiKey: 'test-api-key',
         tokenProvider: {
-          tokenEndpoint: TOKEN_URL,
+          baseURL: TOKEN_URL,
           clientId: 'id',
           clientSecret: 'secret'
         }
@@ -135,7 +135,7 @@ describe('chat', () => {
         baseURL: BASE_URL,
         apiKey: 'test-api-key',
         tokenProvider: {
-          tokenEndpoint: TOKEN_URL,
+          baseURL: TOKEN_URL,
           clientId: 'id',
           clientSecret: 'secret',
           cacheMaxAgeMs: 1000
@@ -158,7 +158,7 @@ describe('chat', () => {
 
     it('should load token provider config from environment variables', async () => {
       prepareTokenResponse('envToken');
-      process.env.TOKEN_PROVIDER_ENDPOINT = TOKEN_URL;
+      process.env.TOKEN_PROVIDER_BASE_URL = TOKEN_URL;
       process.env.TOKEN_PROVIDER_CLIENT_ID = 'id';
       process.env.TOKEN_PROVIDER_CLIENT_SECRET = 'secret';
 
@@ -175,7 +175,7 @@ describe('chat', () => {
 
       expect(server.calls[1]!.requestHeaders.authorization).toBe('Bearer envToken');
 
-      delete process.env.TOKEN_PROVIDER_ENDPOINT;
+      delete process.env.TOKEN_PROVIDER_BASE_URL;
       delete process.env.TOKEN_PROVIDER_CLIENT_ID;
       delete process.env.TOKEN_PROVIDER_CLIENT_SECRET;
     });

@@ -49,7 +49,7 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
     const hasEnv =
       typeof process !== 'undefined' &&
       [
-        'TOKEN_PROVIDER_ENDPOINT',
+        'TOKEN_PROVIDER_BASE_URL',
         'TOKEN_PROVIDER_CLIENT_ID',
         'TOKEN_PROVIDER_CLIENT_SECRET',
         'TOKEN_PROVIDER_HEADER_NAME',
@@ -60,7 +60,7 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
       tokenProvider = loadObjectSetting<TokenProviderConfig>({
         settingValue: undefined,
         environmentVariableMap: {
-          tokenEndpoint: 'TOKEN_PROVIDER_ENDPOINT',
+          baseURL: 'TOKEN_PROVIDER_BASE_URL',
           clientId: 'TOKEN_PROVIDER_CLIENT_ID',
           clientSecret: 'TOKEN_PROVIDER_CLIENT_SECRET',
           headerName: 'TOKEN_PROVIDER_HEADER_NAME',
