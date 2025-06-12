@@ -1,6 +1,6 @@
 import type { FetchFunction } from '@ai-sdk/provider-utils';
 
-export interface TokenServiceConfig {
+export interface TokenProviderConfig {
   tokenEndpoint: string;
   clientId?: string;
   clientSecret?: string;
@@ -8,7 +8,7 @@ export interface TokenServiceConfig {
   cacheMaxAgeMs?: number;
 }
 
-export function createFetchWithToken(config: TokenServiceConfig, baseFetch: FetchFunction = globalThis.fetch): FetchFunction {
+export function createFetchWithToken(config: TokenProviderConfig, baseFetch: FetchFunction = globalThis.fetch): FetchFunction {
   let token: string | undefined;
   let expiresAt = 0;
   const ttl = config.cacheMaxAgeMs ?? 60 * 60 * 1000;

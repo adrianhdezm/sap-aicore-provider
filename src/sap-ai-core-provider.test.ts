@@ -113,7 +113,7 @@ describe('chat', () => {
       const provider = createSapAiCore({
         baseURL: BASE_URL,
         apiKey: 'test-api-key',
-        tokenService: {
+        tokenProvider: {
           tokenEndpoint: TOKEN_URL,
           clientId: 'id',
           clientSecret: 'secret'
@@ -134,7 +134,7 @@ describe('chat', () => {
       const provider = createSapAiCore({
         baseURL: BASE_URL,
         apiKey: 'test-api-key',
-        tokenService: {
+        tokenProvider: {
           tokenEndpoint: TOKEN_URL,
           clientId: 'id',
           clientSecret: 'secret',
