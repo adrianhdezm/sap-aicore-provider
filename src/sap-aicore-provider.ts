@@ -18,8 +18,8 @@ export type SapAiCoreModelId =
 export const AZURE_OPENAI_API_VERSION = '2025-04-01-preview';
 
 export interface SapAiCoreProvider {
-  (deploymentId: string, settings?: OpenAICompatibleChatSettings): LanguageModelV1;
-  chat(deploymentId: string, settings?: OpenAICompatibleChatSettings): LanguageModelV1;
+  (modelId: SapAiCoreModelId, settings?: OpenAICompatibleChatSettings): LanguageModelV1;
+  chat(modelId: SapAiCoreModelId, settings?: OpenAICompatibleChatSettings): LanguageModelV1;
 }
 
 export interface SapAiCoreProviderSettings {
