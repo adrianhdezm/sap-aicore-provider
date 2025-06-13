@@ -5,10 +5,10 @@ import { describe, expect, it, beforeEach } from 'vitest';
 
 const TEST_PROMPT: LanguageModelV1Prompt = [{ role: 'user', content: [{ type: 'text', text: 'Hello' }] }];
 const BASE_URL = `https://test-resource.openai.azure.com/openai/deployments/test-deployment`;
-const TOKEN_URL = 'https://auth.example.com/token';
+const ACCESS_TOKEN_BASE_URL = 'https://auth.example.com/token';
 const server = createTestServer({
   [`${BASE_URL}/chat/completions`]: {},
-  [TOKEN_URL]: {}
+  [ACCESS_TOKEN_BASE_URL]: {}
 });
 function prepareJsonResponse({ content = '' }: { content?: string } = {}) {
   server.urls[`${BASE_URL}/chat/completions`].response = {
@@ -39,7 +39,7 @@ function prepareJsonResponse({ content = '' }: { content?: string } = {}) {
 }
 
 function prepareTokenResponse(token: string) {
-  server.urls[TOKEN_URL].response = {
+  server.urls[ACCESS_TOKEN_BASE_URL].response = {
     type: 'json-value',
     body: { access_token: token }
   };
@@ -108,7 +108,7 @@ describe('chat', () => {
       const provider = createSapAiCore({
         deploymentUrl: BASE_URL,
         tokenProvider: {
-          baseURL: TOKEN_URL,
+          accessTokenBaseUrl: ACCESS_TOKEN_BASE_URL,
           clientId: 'id',
           clientSecret: 'secret'
         }
@@ -128,7 +128,7 @@ describe('chat', () => {
       const provider = createSapAiCore({
         deploymentUrl: BASE_URL,
         tokenProvider: {
-          baseURL: TOKEN_URL,
+          accessTokenBaseUrl: ACCESS_TOKEN_BASE_URL,
           clientId: 'id',
           clientSecret: 'secret',
           cacheMaxAgeMs: 1000
@@ -151,7 +151,7 @@ describe('chat', () => {
 
     it('should load token provider config from environment variables', async () => {
       prepareTokenResponse('envToken');
-      process.env.TOKEN_PROVIDER_BASE_URL = TOKEN_URL;
+      process.env.TOKEN_PROVIDER_BASE_URL = ACCESS_TOKEN_BASE_URL;
       process.env.TOKEN_PROVIDER_CLIENT_ID = 'id';
       process.env.TOKEN_PROVIDER_CLIENT_SECRET = 'secret';
 

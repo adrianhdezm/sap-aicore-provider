@@ -28,7 +28,7 @@ const { text } = await generateText({
 
 ### Configuration
 
-`createSapAiCore` accepts configuration options such as `baseURL` and custom headers:
+`createSapAiCore` accepts configuration options such as `deploymentUrl` and custom headers:
 
 ```ts
 createSapAiCore({
@@ -45,7 +45,7 @@ Use `tokenProvider` to automatically fetch an access token before each request:
 createSapAiCore({
   deploymentUrl: 'https://your-sap-aicore-instance',
   tokenProvider: {
-    baseURL: 'https://auth.example.com/token',
+    accessTokenBaseUrl: 'https://auth.example.com/token',
     clientId: 'your-client-id',
     clientSecret: 'your-client-secret',
     cacheMaxAgeMs: 3600000 // optional token cache duration (default 1h)

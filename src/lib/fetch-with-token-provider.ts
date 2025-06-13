@@ -1,7 +1,7 @@
 import type { FetchFunction } from '@ai-sdk/provider-utils';
 
 export interface TokenProviderConfig {
-  baseURL: string;
+  accessTokenBaseUrl: string;
   clientId?: string;
   clientSecret?: string;
   headerName?: string;
@@ -16,7 +16,7 @@ export function createFetchWithToken(config: TokenProviderConfig, baseFetch: Fet
   return async (input, init = {}) => {
     const now = Date.now();
     if (!token || now > expiresAt) {
-      const tokenRes = await baseFetch(config.baseURL, {
+      const tokenRes = await baseFetch(config.accessTokenBaseUrl, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({

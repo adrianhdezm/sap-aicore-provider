@@ -53,7 +53,7 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
       tokenProvider = loadObjectSetting<TokenProviderConfig>({
         settingValue: undefined,
         environmentVariableMap: {
-          baseURL: 'TOKEN_PROVIDER_BASE_URL',
+          accessTokenBaseUrl: 'TOKEN_PROVIDER_BASE_URL',
           clientId: 'TOKEN_PROVIDER_CLIENT_ID',
           clientSecret: 'TOKEN_PROVIDER_CLIENT_SECRET',
           headerName: 'TOKEN_PROVIDER_HEADER_NAME',
