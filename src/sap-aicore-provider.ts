@@ -15,7 +15,7 @@ export type SapAiCoreModelId =
   | 'sap-aicore/o4-mini'
   | (string & {});
 
-export const AZURE_OPENAI_API_VERSION = '2024-06-01-preview';
+export const AZURE_OPENAI_API_VERSION = '2025-04-01-preview';
 
 export interface SapAiCoreProvider {
   (deploymentId: string, settings?: OpenAICompatibleChatSettings): LanguageModelV1;
