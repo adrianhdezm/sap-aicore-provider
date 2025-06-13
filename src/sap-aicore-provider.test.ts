@@ -94,6 +94,7 @@ describe('chat', () => {
 
       expect(server.calls[1]!.requestHeaders).toStrictEqual({
         authorization: 'Bearer token123',
+        'ai-resource-group': 'default',
         'content-type': 'application/json',
         'custom-provider-header': 'provider-header-value',
         'custom-request-header': 'request-header-value'

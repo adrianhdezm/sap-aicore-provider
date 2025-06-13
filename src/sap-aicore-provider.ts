@@ -14,12 +14,15 @@ export interface SapAiCoreProvider {
 export interface SapAiCoreProviderSettings {
   deploymentUrl?: string;
   headers?: Record<string, string>;
+  aiResourceGroup?: string;
   tokenProvider?: TokenProviderConfig;
   fetch?: FetchFunction;
 }
 
 export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiCoreProvider {
   const getHeaders = () => ({
+    'Content-Type': 'application/json',
+    'AI-Resource-Group': options.aiResourceGroup ?? 'default',
     ...options.headers
   });
 
