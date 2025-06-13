@@ -63,4 +63,18 @@ describe('createFetchWithToken', () => {
 
     expect(server.calls[1]!.requestHeaders['x-token']).toBe('Bearer token123');
   });
+
+  it('throws when token request is unauthorized', async () => {
+    server.urls[ACCESS_TOKEN_URL].response = {
+      type: 'error',
+      status: 401
+    };
+    const fetch = createFetchWithToken({
+      accessTokenBaseUrl: ACCESS_TOKEN_BASE_URL,
+      clientId: 'id',
+      clientSecret: 'secret'
+    });
+
+    await expect(fetch(API_URL)).rejects.toThrow('Unauthorized');
+  });
 });
