@@ -38,11 +38,11 @@ export function createFetchWithToken(config?: TokenProviderConfig, baseFetch: Fe
     const now = Date.now();
     if (!access_token || now > expiresAt) {
       const accessTokenUrl = `${accessTokenBaseUrl}/oauth/token?grant_type=client_credentials`;
-      const tokenRes = await baseFetch(accessTokenUrl, {
+      const tokenResponce = await baseFetch(accessTokenUrl, {
         method: 'GET',
         headers: { Authorization: `Basic ${btoa(`${clientId}:${clientSecret}`)}` }
       });
-      const response = (await tokenRes.json()) as { access_token: string };
+      const response = (await tokenResponce.json()) as { access_token: string };
       access_token = response.access_token;
       expiresAt = now + ttl;
     }
