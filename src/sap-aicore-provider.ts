@@ -5,7 +5,7 @@ import { createFetchWithToken, type TokenProviderConfig } from './lib/fetch-with
 import { loadObjectSetting } from './lib/load-object-setting';
 
 export type SapAiCoreModelId = 'sap-aicore/gpt-4o' | 'sap-aicore/gpt-4.1' | (string & {});
-const AZURE_OPENAI_API_VERSION = '2024-06-01-preview';
+export const AZURE_OPENAI_API_VERSION = '2024-06-01-preview';
 
 export interface SapAiCoreProvider {
   (deploymentId: string, settings?: OpenAICompatibleChatSettings): LanguageModelV1;
@@ -13,7 +13,7 @@ export interface SapAiCoreProvider {
 }
 
 export interface SapAiCoreProviderSettings {
-  baseURL?: string;
+  deploymentUrl?: string;
   headers?: Record<string, string>;
   tokenProvider?: TokenProviderConfig;
   fetch?: FetchFunction;
@@ -25,14 +25,14 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
   });
 
   const url = ({ path }: { path: string }) => {
-    const baseUrl = loadSetting({
-      settingValue: options.baseURL,
-      environmentVariableName: 'AZURE_ENDPOINT',
-      settingName: 'baseURL',
-      description: 'SAP AI Core Base URL'
+    const deploymentUrl = loadSetting({
+      settingValue: options.deploymentUrl,
+      environmentVariableName: 'SAP_AICORE_DEPLOYMENT_URL',
+      settingName: 'deploymentUrl',
+      description: 'SAP AI Core Deployment URL'
     });
 
-    const url = new URL(`${baseUrl}${path}`);
+    const url = new URL(`${deploymentUrl}${path}`);
     url.searchParams.set('api-version', AZURE_OPENAI_API_VERSION);
     return url.toString();
   };

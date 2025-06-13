@@ -1,6 +1,6 @@
 import type { LanguageModelV1Prompt } from '@ai-sdk/provider';
 import { createTestServer } from '@ai-sdk/provider-utils/test';
-import { createSapAiCore } from './sap-aicore-provider';
+import { AZURE_OPENAI_API_VERSION, createSapAiCore } from './sap-aicore-provider';
 import { describe, expect, it, beforeEach } from 'vitest';
 
 const TEST_PROMPT: LanguageModelV1Prompt = [{ role: 'user', content: [{ type: 'text', text: 'Hello' }] }];
@@ -53,7 +53,7 @@ describe('chat', () => {
 
     it('should set the correct default api version', async () => {
       const provider = createSapAiCore({
-        baseURL: BASE_URL
+        deploymentUrl: BASE_URL
       });
 
       await provider('test-deployment').doGenerate({
@@ -62,12 +62,12 @@ describe('chat', () => {
         prompt: TEST_PROMPT
       });
 
-      expect(server.calls[0]!.requestUrlSearchParams.get('api-version')).toStrictEqual('2025-03-01-preview');
+      expect(server.calls[0]!.requestUrlSearchParams.get('api-version')).toStrictEqual(AZURE_OPENAI_API_VERSION);
     });
 
     it('should pass headers', async () => {
       const provider = createSapAiCore({
-        baseURL: BASE_URL,
+        deploymentUrl: BASE_URL,
         headers: {
           'Custom-Provider-Header': 'provider-header-value'
         }
@@ -89,9 +89,9 @@ describe('chat', () => {
       });
     });
 
-    it('should use the baseURL correctly', async () => {
+    it('should use the deploymentUrl correctly', async () => {
       const provider = createSapAiCore({
-        baseURL: BASE_URL
+        deploymentUrl: BASE_URL
       });
 
       await provider('test-deployment').doGenerate({
@@ -100,13 +100,13 @@ describe('chat', () => {
         prompt: TEST_PROMPT
       });
 
-      expect(server.calls[0]!.requestUrl).toStrictEqual(`${BASE_URL}/chat/completions?api-version=2025-03-01-preview`);
+      expect(server.calls[0]!.requestUrl).toStrictEqual(`${BASE_URL}/chat/completions?api-version=${AZURE_OPENAI_API_VERSION}`);
     });
 
     it('should add token from service to Authorization header', async () => {
       prepareTokenResponse('token123');
       const provider = createSapAiCore({
-        baseURL: BASE_URL,
+        deploymentUrl: BASE_URL,
         tokenProvider: {
           baseURL: TOKEN_URL,
           clientId: 'id',
@@ -126,7 +126,7 @@ describe('chat', () => {
     it('should cache tokens to avoid repeated fetches', async () => {
       prepareTokenResponse('token123');
       const provider = createSapAiCore({
-        baseURL: BASE_URL,
+        deploymentUrl: BASE_URL,
         tokenProvider: {
           baseURL: TOKEN_URL,
           clientId: 'id',
@@ -156,7 +156,7 @@ describe('chat', () => {
       process.env.TOKEN_PROVIDER_CLIENT_SECRET = 'secret';
 
       const provider = createSapAiCore({
-        baseURL: BASE_URL
+        deploymentUrl: BASE_URL
       });
 
       await provider('test-deployment').doGenerate({

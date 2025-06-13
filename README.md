@@ -32,7 +32,7 @@ const { text } = await generateText({
 
 ```ts
 createSapAiCore({
-  baseURL: 'https://your-sap-aicore-instance',
+  deploymentUrl: 'https://your-sap-aicore-instance',
   headers: {
     'Custom-Header': 'value'
   }
@@ -43,7 +43,7 @@ Use `tokenProvider` to automatically fetch an access token before each request:
 
 ```ts
 createSapAiCore({
-  baseURL: 'https://your-sap-aicore-instance',
+  deploymentUrl: 'https://your-sap-aicore-instance',
   tokenProvider: {
     baseURL: 'https://auth.example.com/token',
     clientId: 'your-client-id',
