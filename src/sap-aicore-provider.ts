@@ -1,6 +1,6 @@
 import { OpenAICompatibleChatLanguageModel, type OpenAICompatibleChatSettings } from '@ai-sdk/openai-compatible';
 import type { LanguageModelV1 } from '@ai-sdk/provider';
-import { type FetchFunction, loadApiKey, loadSetting } from '@ai-sdk/provider-utils';
+import { type FetchFunction, loadSetting } from '@ai-sdk/provider-utils';
 import { createFetchWithToken, type TokenProviderConfig } from './lib/fetch-with-token-provider';
 import { loadObjectSetting } from './lib/load-object-setting';
 
@@ -13,7 +13,6 @@ export interface SapAiCoreProvider {
 
 export interface SapAiCoreProviderSettings {
   baseURL?: string;
-  apiKey?: string;
   headers?: Record<string, string>;
   fetch?: FetchFunction;
   apiVersion?: string;
@@ -22,11 +21,6 @@ export interface SapAiCoreProviderSettings {
 
 export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiCoreProvider {
   const getHeaders = () => ({
-    'api-key': loadApiKey({
-      apiKey: options.apiKey,
-      environmentVariableName: 'AZURE_API_KEY',
-      description: 'SAP AI Core API Key'
-    }),
     ...options.headers
   });
 

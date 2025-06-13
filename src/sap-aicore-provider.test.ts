@@ -53,8 +53,7 @@ describe('chat', () => {
 
     it('should set the correct default api version', async () => {
       const provider = createSapAiCore({
-        baseURL: BASE_URL,
-        apiKey: 'test-api-key'
+        baseURL: BASE_URL
       });
 
       await provider('test-deployment').doGenerate({
@@ -69,7 +68,6 @@ describe('chat', () => {
     it('should pass headers', async () => {
       const provider = createSapAiCore({
         baseURL: BASE_URL,
-        apiKey: 'test-api-key',
         headers: {
           'Custom-Provider-Header': 'provider-header-value'
         }
@@ -85,7 +83,6 @@ describe('chat', () => {
       });
 
       expect(server.calls[0]!.requestHeaders).toStrictEqual({
-        'api-key': 'test-api-key',
         'content-type': 'application/json',
         'custom-provider-header': 'provider-header-value',
         'custom-request-header': 'request-header-value'
@@ -94,8 +91,7 @@ describe('chat', () => {
 
     it('should use the baseURL correctly', async () => {
       const provider = createSapAiCore({
-        baseURL: BASE_URL,
-        apiKey: 'test-api-key'
+        baseURL: BASE_URL
       });
 
       await provider('test-deployment').doGenerate({
@@ -111,7 +107,6 @@ describe('chat', () => {
       prepareTokenResponse('token123');
       const provider = createSapAiCore({
         baseURL: BASE_URL,
-        apiKey: 'test-api-key',
         tokenProvider: {
           baseURL: TOKEN_URL,
           clientId: 'id',
@@ -132,7 +127,6 @@ describe('chat', () => {
       prepareTokenResponse('token123');
       const provider = createSapAiCore({
         baseURL: BASE_URL,
-        apiKey: 'test-api-key',
         tokenProvider: {
           baseURL: TOKEN_URL,
           clientId: 'id',
@@ -162,8 +156,7 @@ describe('chat', () => {
       process.env.TOKEN_PROVIDER_CLIENT_SECRET = 'secret';
 
       const provider = createSapAiCore({
-        baseURL: BASE_URL,
-        apiKey: 'test-api-key'
+        baseURL: BASE_URL
       });
 
       await provider('test-deployment').doGenerate({
