@@ -40,6 +40,28 @@ createSapAiCore({
 });
 ```
 
+Use `tokenProvider` to automatically fetch an access token before each request:
+
+```ts
+createSapAiCore({
+  baseURL: 'https://your-sap-ai-core-instance',
+  apiKey: 'your-api-key',
+  tokenProvider: {
+    baseURL: 'https://auth.example.com/token',
+    clientId: 'your-client-id',
+    clientSecret: 'your-client-secret',
+    cacheMaxAgeMs: 3600000 // optional token cache duration (default 1h)
+  }
+});
+```
+
+Alternatively, provide these values using the `TOKEN_PROVIDER_BASE_URL`,
+`TOKEN_PROVIDER_CLIENT_ID`, `TOKEN_PROVIDER_CLIENT_SECRET`,
+`TOKEN_PROVIDER_HEADER_NAME`, and `TOKEN_PROVIDER_CACHE_MAX_AGE_MS`
+environment variables.
+
+Tokens are cached for one hour by default to reduce token provider requests.
+
 ## License
 
 MIT
