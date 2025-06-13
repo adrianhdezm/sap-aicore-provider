@@ -1,7 +1,7 @@
 import type { LanguageModelV1Prompt } from '@ai-sdk/provider';
 import { createTestServer } from '@ai-sdk/provider-utils/test';
 import { AZURE_OPENAI_API_VERSION, createSapAiCore } from './sap-aicore-provider';
-import { describe, expect, it, beforeEach } from 'vitest';
+import { describe, expect, it, beforeEach, afterEach } from 'vitest';
 
 const TEST_PROMPT: LanguageModelV1Prompt = [{ role: 'user', content: [{ type: 'text', text: 'Hello' }] }];
 const BASE_URL = `https://test-resource.openai.azure.com/openai/deployments/test-deployment`;
@@ -48,7 +48,17 @@ function prepareTokenResponse(token: string) {
 describe('chat', () => {
   describe('doGenerate', () => {
     beforeEach(() => {
+      prepareTokenResponse('token123');
       prepareJsonResponse();
+      process.env.ACCESS_TOKEN_BASE_URL = ACCESS_TOKEN_BASE_URL;
+      process.env.CLIENT_ID = 'id';
+      process.env.CLIENT_SECRET = 'secret';
+    });
+
+    afterEach(() => {
+      delete process.env.ACCESS_TOKEN_BASE_URL;
+      delete process.env.CLIENT_ID;
+      delete process.env.CLIENT_SECRET;
     });
 
     it('should set the correct default api version', async () => {
@@ -62,7 +72,7 @@ describe('chat', () => {
         prompt: TEST_PROMPT
       });
 
-      expect(server.calls[0]!.requestUrlSearchParams.get('api-version')).toStrictEqual(AZURE_OPENAI_API_VERSION);
+      expect(server.calls[1]!.requestUrlSearchParams.get('api-version')).toStrictEqual(AZURE_OPENAI_API_VERSION);
     });
 
     it('should pass headers', async () => {
@@ -82,7 +92,8 @@ describe('chat', () => {
         }
       });
 
-      expect(server.calls[0]!.requestHeaders).toStrictEqual({
+      expect(server.calls[1]!.requestHeaders).toStrictEqual({
+        authorization: 'Bearer token123',
         'content-type': 'application/json',
         'custom-provider-header': 'provider-header-value',
         'custom-request-header': 'request-header-value'
@@ -100,11 +111,10 @@ describe('chat', () => {
         prompt: TEST_PROMPT
       });
 
-      expect(server.calls[0]!.requestUrl).toStrictEqual(`${BASE_URL}/chat/completions?api-version=${AZURE_OPENAI_API_VERSION}`);
+      expect(server.calls[1]!.requestUrl).toStrictEqual(`${BASE_URL}/chat/completions?api-version=${AZURE_OPENAI_API_VERSION}`);
     });
 
     it('should add token from service to Authorization header', async () => {
-      prepareTokenResponse('token123');
       const provider = createSapAiCore({
         deploymentUrl: BASE_URL,
         tokenProvider: {
@@ -124,7 +134,6 @@ describe('chat', () => {
     });
 
     it('should cache tokens to avoid repeated fetches', async () => {
-      prepareTokenResponse('token123');
       const provider = createSapAiCore({
         deploymentUrl: BASE_URL,
         tokenProvider: {
@@ -150,10 +159,9 @@ describe('chat', () => {
     });
 
     it('should load token provider config from environment variables', async () => {
-      prepareTokenResponse('envToken');
-      process.env.TOKEN_PROVIDER_BASE_URL = ACCESS_TOKEN_BASE_URL;
-      process.env.TOKEN_PROVIDER_CLIENT_ID = 'id';
-      process.env.TOKEN_PROVIDER_CLIENT_SECRET = 'secret';
+      process.env.ACCESS_TOKEN_BASE_URL = ACCESS_TOKEN_BASE_URL;
+      process.env.CLIENT_ID = 'id';
+      process.env.CLIENT_SECRET = 'secret';
 
       const provider = createSapAiCore({
         deploymentUrl: BASE_URL
@@ -165,11 +173,7 @@ describe('chat', () => {
         prompt: TEST_PROMPT
       });
 
-      expect(server.calls[1]!.requestHeaders.authorization).toBe('Bearer envToken');
-
-      delete process.env.TOKEN_PROVIDER_BASE_URL;
-      delete process.env.TOKEN_PROVIDER_CLIENT_ID;
-      delete process.env.TOKEN_PROVIDER_CLIENT_SECRET;
+      expect(server.calls[1]!.requestHeaders.authorization).toBe('Bearer token123');
     });
   });
 });
