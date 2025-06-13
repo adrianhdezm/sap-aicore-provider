@@ -43,7 +43,7 @@ export function createFetchWithToken(config?: TokenProviderConfig, baseFetch: Fe
         headers: { Authorization: `Basic ${btoa(`${clientId}:${clientSecret}`)}` }
       });
       if (!tokenResponse.ok) {
-        throw new Error('Unauthorized');
+        throw new Error(`Token fetch failed: ${tokenResponse.status} ${tokenResponse.statusText}`);
       }
       const response = (await tokenResponse.json()) as { access_token: string };
       access_token = response.access_token;
