@@ -5,6 +5,7 @@ import { createFetchWithToken, type TokenProviderConfig } from './lib/fetch-with
 import { loadObjectSetting } from './lib/load-object-setting';
 
 export type SapAiCoreModelId = 'sap-aicore/gpt-4o' | 'sap-aicore/gpt-4.1' | (string & {});
+const AZURE_OPENAI_API_VERSION = '2024-06-01-preview';
 
 export interface SapAiCoreProvider {
   (deploymentId: string, settings?: OpenAICompatibleChatSettings): LanguageModelV1;
@@ -14,9 +15,8 @@ export interface SapAiCoreProvider {
 export interface SapAiCoreProviderSettings {
   baseURL?: string;
   headers?: Record<string, string>;
-  fetch?: FetchFunction;
-  apiVersion?: string;
   tokenProvider?: TokenProviderConfig;
+  fetch?: FetchFunction;
 }
 
 export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiCoreProvider {
@@ -24,7 +24,6 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
     ...options.headers
   });
 
-  const apiVersion = options.apiVersion ?? '2025-03-01-preview';
   const url = ({ path }: { path: string }) => {
     const baseUrl = loadSetting({
       settingValue: options.baseURL,
@@ -34,7 +33,7 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
     });
 
     const url = new URL(`${baseUrl}${path}`);
-    url.searchParams.set('api-version', apiVersion);
+    url.searchParams.set('api-version', AZURE_OPENAI_API_VERSION);
     return url.toString();
   };
 
