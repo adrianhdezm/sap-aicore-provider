@@ -28,32 +28,45 @@ const { text } = await generateText({
 
 ### Configuration
 
-`createSapAiCore` accepts configuration options such as `deploymentUrl` and custom headers:
+You can configure the SAP AI Core provider using the `createSapAiCore` function. Below are the most common options:
+
+#### Basic Example
 
 ```ts
-createSapAiCore({
-  deploymentUrl: 'https://your-sap-aicore-instance',
+import { createSapAiCore } from '@ai-foundry/sap-aicore-provider';
+
+const sapAiCore = createSapAiCore({
+  deploymentUrl: 'https://your-sap-aicore-instance', // Required: Your SAP AI Core deployment URL
   headers: {
-    'Custom-Header': 'value'
+    'Custom-Header': 'value' // Optional: Add any custom headers
   }
 });
 ```
 
-Use `tokenProvider` to automatically fetch an access token before each request:
+#### Using a Token Provider
+
+To automatically fetch an access token before each request, use the `tokenProvider` option:
 
 ```ts
-createSapAiCore({
+const sapAiCore = createSapAiCore({
   deploymentUrl: 'https://your-sap-aicore-instance',
   tokenProvider: {
-    accessTokenBaseUrl: 'https://auth.example.com/token',
+    accessTokenBaseUrl: 'https://auth.example.com/token', // Auth endpoint
     clientId: 'your-client-id',
     clientSecret: 'your-client-secret',
-    cacheMaxAgeMs: 3600000 // optional token cache duration (default 1h)
+    cacheMaxAgeMs: 3600000 // Optional: Token cache duration (default 1h)
   }
 });
 ```
 
-Alternatively, provide these values using the `SAP_AICORE_DEPLOYMENT_URL`, `ACCESS_TOKEN_BASE_URL`, `CLIENT_ID`, `CLIENT_SECRET` environment variables.
+#### Environment Variables
+
+You can also provide configuration values using environment variables:
+
+- `SAP_AICORE_DEPLOYMENT_URL`
+- `ACCESS_TOKEN_BASE_URL`
+- `CLIENT_ID`
+- `CLIENT_SECRET`
 
 Tokens are cached for one hour by default to reduce token provider requests.
 
