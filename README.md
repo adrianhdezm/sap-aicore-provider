@@ -53,10 +53,7 @@ createSapAiCore({
 });
 ```
 
-Alternatively, provide these values using the `TOKEN_PROVIDER_BASE_URL`,
-`TOKEN_PROVIDER_CLIENT_ID`, `TOKEN_PROVIDER_CLIENT_SECRET`,
-`TOKEN_PROVIDER_HEADER_NAME`, and `TOKEN_PROVIDER_CACHE_MAX_AGE_MS`
-environment variables.
+Alternatively, provide these values using the `SAP_AICORE_DEPLOYMENT_URL`, `ACCESS_TOKEN_BASE_URL`, `CLIENT_ID`, `CLIENT_SECRET` environment variables.
 
 Tokens are cached for one hour by default to reduce token provider requests.
 
