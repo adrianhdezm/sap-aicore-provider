@@ -3,15 +3,16 @@ import { createFetchWithToken } from './fetch-with-token-provider';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 const ACCESS_TOKEN_BASE_URL = 'https://auth.example.com/token';
+const ACCESS_TOKEN_URL = `${ACCESS_TOKEN_BASE_URL}/oauth/token`;
 const API_URL = 'https://api.example.com/data';
 
 const server = createTestServer({
-  [ACCESS_TOKEN_BASE_URL]: {},
+  [ACCESS_TOKEN_URL]: {},
   [API_URL]: {}
 });
 
 beforeEach(() => {
-  server.urls[ACCESS_TOKEN_BASE_URL].response = {
+  server.urls[ACCESS_TOKEN_URL].response = {
     type: 'json-value',
     body: { access_token: 'token123' }
   };
@@ -31,7 +32,7 @@ describe('createFetchWithToken', () => {
 
     const res = await fetch(API_URL);
     expect(await res.json()).toStrictEqual({ ok: true });
-    expect(server.calls[0]!.requestUrl).toBe(ACCESS_TOKEN_BASE_URL);
+    expect(server.calls[0]!.requestUrl).toBe(`${ACCESS_TOKEN_URL}?grant_type=client_credentials`);
     expect(server.calls[1]!.requestHeaders.authorization).toBe('Bearer token123');
   });
 
@@ -45,8 +46,9 @@ describe('createFetchWithToken', () => {
 
     await fetch(API_URL);
     await fetch(API_URL);
+    await fetch(API_URL);
 
-    expect(server.calls.length).toBe(3);
+    expect(server.calls.length).toBe(4);
   });
 
   it('uses a custom header name when provided', async () => {

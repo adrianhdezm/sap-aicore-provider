@@ -5,10 +5,11 @@ import { describe, expect, it, beforeEach, afterEach } from 'vitest';
 
 const TEST_PROMPT: LanguageModelV1Prompt = [{ role: 'user', content: [{ type: 'text', text: 'Hello' }] }];
 const BASE_URL = `https://test-resource.openai.azure.com/openai/deployments/test-deployment`;
-const ACCESS_TOKEN_BASE_URL = 'https://auth.example.com/token';
+const ACCESS_TOKEN_BASE_URL = 'https://auth.example.com';
+const ACCESS_TOKEN_URL = `${ACCESS_TOKEN_BASE_URL}/oauth/token`;
 const server = createTestServer({
   [`${BASE_URL}/chat/completions`]: {},
-  [ACCESS_TOKEN_BASE_URL]: {}
+  [ACCESS_TOKEN_URL]: {}
 });
 function prepareJsonResponse({ content = '' }: { content?: string } = {}) {
   server.urls[`${BASE_URL}/chat/completions`].response = {
@@ -39,7 +40,7 @@ function prepareJsonResponse({ content = '' }: { content?: string } = {}) {
 }
 
 function prepareTokenResponse(token: string) {
-  server.urls[ACCESS_TOKEN_BASE_URL].response = {
+  server.urls[ACCESS_TOKEN_URL].response = {
     type: 'json-value',
     body: { access_token: token }
   };

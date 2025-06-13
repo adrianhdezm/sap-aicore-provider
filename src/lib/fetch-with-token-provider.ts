@@ -9,7 +9,7 @@ export interface TokenProviderConfig {
 }
 
 export function createFetchWithToken(config?: TokenProviderConfig, baseFetch: FetchFunction = globalThis.fetch): FetchFunction {
-  let token: string | undefined;
+  let access_token: string | undefined;
   let expiresAt = 0;
   const ttl = config?.cacheMaxAgeMs ?? 60 * 60 * 1000;
   const headerName = config?.headerName ?? 'Authorization';
@@ -36,23 +36,20 @@ export function createFetchWithToken(config?: TokenProviderConfig, baseFetch: Fe
     });
 
     const now = Date.now();
-    if (!token || now > expiresAt) {
-      const tokenRes = await baseFetch(accessTokenBaseUrl, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          clientId: clientId,
-          clientSecret: clientSecret
-        })
+    if (!access_token || now > expiresAt) {
+      const accessTokenUrl = `${accessTokenBaseUrl}/oauth/token?grant_type=client_credentials`;
+      const tokenRes = await baseFetch(accessTokenUrl, {
+        method: 'GET',
+        headers: { Authorization: `Basic ${btoa(`${clientId}:${clientSecret}`)}` }
       });
-      const tokenJson: any = await tokenRes.json();
-      token = tokenJson.access_token ?? tokenJson.token;
+      const response = (await tokenRes.json()) as { access_token: string };
+      access_token = response.access_token;
       expiresAt = now + ttl;
     }
 
     const headers = new Headers(init.headers);
-    if (token) {
-      headers.set(headerName, `Bearer ${token}`);
+    if (access_token) {
+      headers.set(headerName, `Bearer ${access_token}`);
     }
     return baseFetch(input, { ...init, headers });
   };
