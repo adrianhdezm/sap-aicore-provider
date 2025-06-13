@@ -1,18 +1,18 @@
 {
-  "name": "@ai-foundry/sap-ai-core-provider",
+  "name": "@ai-foundry/sap-aicore-provider",
   "description": "SAP AI Core Foundation Models provider plugin for Vercel AI SDK",
   "version": "0.0.3",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/adrianhdezm/sap-ai-core-provider.git"
+    "url": "git+https://github.com/adrianhdezm/sap-aicore-provider.git"
   },
   "keywords": [],
   "author": "Adrian Hernandez Mendez",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/adrianhdezm/sap-ai-core-provider/issues"
+    "url": "https://github.com/adrianhdezm/sap-aicore-provider/issues"
   },
-  "homepage": "https://github.com/adrianhdezm/sap-ai-core-provider#readme",
+  "homepage": "https://github.com/adrianhdezm/sap-aicore-provider#readme",
   "files": [
     "dist",
     "README.md",

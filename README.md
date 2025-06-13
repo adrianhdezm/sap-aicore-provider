@@ -1,4 +1,4 @@
-# sap-ai-core-provider
+# sap-aicore-provider
 
 SAP AI Core Foundation Models provider plugin for Vercel AI SDK
 
@@ -9,19 +9,19 @@ This package enables seamless integration of SAP AI Core Foundation Models with 
 ## Installation
 
 ```sh
-npm install @ai-foundry/sap-ai-core-provider ai
+npm install @ai-foundry/sap-aicore-provider ai
 ```
 
 ## Usage
 
-### Using sap-ai-core-provider
+### Using sap-aicore-provider
 
 ```ts
-import { sapAiCore } from '@ai-foundry/sap-ai-core-provider';
+import { sapAiCore } from '@ai-foundry/sap-aicore-provider';
 import { generateText } from 'ai';
 
 const { text } = await generateText({
-  model: sapAiCore('sap-ai-core/gpt-4o'),
+  model: sapAiCore('sap-aicore/gpt-4o'),
   prompt: 'Hello, how are you?'
 });
 ```
@@ -32,7 +32,7 @@ const { text } = await generateText({
 
 ```ts
 createSapAiCore({
-  baseURL: 'https://your-sap-ai-core-instance',
+  baseURL: 'https://your-sap-aicore-instance',
   apiKey: 'your-api-key',
   headers: {
     'Custom-Header': 'value'
@@ -44,7 +44,7 @@ Use `tokenProvider` to automatically fetch an access token before each request:
 
 ```ts
 createSapAiCore({
-  baseURL: 'https://your-sap-ai-core-instance',
+  baseURL: 'https://your-sap-aicore-instance',
   apiKey: 'your-api-key',
   tokenProvider: {
     baseURL: 'https://auth.example.com/token',
@@ -68,4 +68,4 @@ MIT
 
 ## Contributing
 
-Contributions are welcome! Please open issues or pull requests on [GitHub](https://github.com/adrianhdezm/sap-ai-core-provider).
+Contributions are welcome! Please open issues or pull requests on [GitHub](https://github.com/adrianhdezm/sap-aicore-provider).
