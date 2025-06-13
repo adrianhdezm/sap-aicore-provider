@@ -3,7 +3,18 @@ import type { LanguageModelV1 } from '@ai-sdk/provider';
 import { type FetchFunction, loadSetting } from '@ai-sdk/provider-utils';
 import { createFetchWithToken, type TokenProviderConfig } from './lib/fetch-with-token-provider';
 
-export type SapAiCoreModelId = 'sap-aicore/gpt-4o' | 'sap-aicore/gpt-4.1' | (string & {});
+export type SapAiCoreModelId =
+  | 'sap-aicore/gpt-4o'
+  | 'sap-aicore/gpt-4o-mini'
+  | 'sap-aicore/gpt-4.1'
+  | 'sap-aicore/gpt-4.1-nano'
+  | 'sap-aicore/gpt-4.1-mini'
+  | 'sap-aicore/o3'
+  | 'sap-aicore/o3-mini'
+  | 'sap-aicore/o1'
+  | 'sap-aicore/o4-mini'
+  | (string & {});
+
 export const AZURE_OPENAI_API_VERSION = '2024-06-01-preview';
 
 export interface SapAiCoreProvider {
