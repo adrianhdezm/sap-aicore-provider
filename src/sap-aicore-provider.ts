@@ -1,16 +1,10 @@
 import type { LanguageModelV1 } from '@ai-sdk/provider';
-import {
-  AzureOpenAICompatibleChatLanguageModel,
-  type AzureOpenAICompatibleChatConfig,
-  OPENAI_MODEL_IDS,
-  isAzureOpenAIModelId
-} from './azure-openai/chat-model';
+import { AzureOpenAICompatibleChatLanguageModel, type AzureOpenAICompatibleChatConfig, OPENAI_MODEL_IDS } from './azure-openai/chat-model';
 import {
   BedrockConverseCompatibleChatLanguageModel,
   type BedrockConverseCompatibleChatConfig,
   type BedrockChatSettings,
-  BEDROCK_MODEL_IDS,
-  isBedrockModelId
+  BEDROCK_MODEL_IDS
 } from './bedrock-converse/chat-model';
 import type { OpenAICompatibleChatSettings } from '@ai-sdk/openai-compatible';
 import { type FetchFunction, loadSetting } from '@ai-sdk/provider-utils';
@@ -77,24 +71,14 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
   const azureStrategy = new AzureOpenAICompatibleChatLanguageModel(azureConfig);
   const bedrockStrategy = new BedrockConverseCompatibleChatLanguageModel(bedrockConfig);
 
-  function isOpenAISettings(value: unknown): value is OpenAICompatibleChatSettings {
-    return !!value && typeof value === 'object';
-  }
-
-  function isBedrockSettings(value: unknown): value is BedrockChatSettings {
-    return !!value && typeof value === 'object';
-  }
-
   const createChatModel = (
     modelId: SapAiCoreModelId,
     settings: OpenAICompatibleChatSettings | BedrockChatSettings = {}
   ): LanguageModelV1 => {
-    if (isAzureOpenAIModelId(modelId)) {
-      const opts = isOpenAISettings(settings) ? settings : {};
-      return azureStrategy.createChatModel(modelId, opts);
-    } else if (isBedrockModelId(modelId)) {
-      const opts = isBedrockSettings(settings) ? settings : {};
-      return bedrockStrategy.createChatModel(modelId, opts);
+    if ((OPENAI_MODEL_IDS as readonly string[]).includes(modelId)) {
+      return azureStrategy.createChatModel(modelId, settings as OpenAICompatibleChatSettings);
+    } else if ((BEDROCK_MODEL_IDS as readonly string[]).includes(modelId)) {
+      return bedrockStrategy.createChatModel(modelId, settings as BedrockChatSettings);
     }
     throw new Error(`Unsupported model ID: ${modelId}. Supported models are: ${[...OPENAI_MODEL_IDS, ...BEDROCK_MODEL_IDS].join(', ')}`);
   };

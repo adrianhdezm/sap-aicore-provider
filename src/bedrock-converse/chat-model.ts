@@ -35,7 +35,3 @@ export const BEDROCK_MODEL_IDS = [
 ] as const;
 
 export type BedrockModelId = (typeof BEDROCK_MODEL_IDS)[number];
-
-export function isBedrockModelId(modelId: string): modelId is BedrockModelId {
-  return (BEDROCK_MODEL_IDS as readonly string[]).includes(modelId);
-}

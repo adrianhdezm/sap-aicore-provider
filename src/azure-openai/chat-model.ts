@@ -16,10 +16,6 @@ export const OPENAI_MODEL_IDS = [
 
 export type AzureOpenAIModelId = (typeof OPENAI_MODEL_IDS)[number];
 
-export function isAzureOpenAIModelId(modelId: string): modelId is AzureOpenAIModelId {
-  return (OPENAI_MODEL_IDS as readonly string[]).includes(modelId);
-}
-
 export interface AzureOpenAICompatibleChatConfig {
   provider: string;
   url: ({ path }: { path: string }) => string;
