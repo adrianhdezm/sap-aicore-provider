@@ -5,6 +5,7 @@ export interface BedrockChatConfig {
   baseUrl: () => string;
   headers: () => Record<string, string>;
   fetch?: FetchFunction;
+  generateId: () => string;
   additionalModelRequestFields?: Record<string, any>;
 }
 

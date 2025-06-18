@@ -65,7 +65,8 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
     provider: 'sap-aicore.chat',
     baseUrl: bedrockBaseUrl,
     headers: getHeaders,
-    fetch
+    fetch,
+    generateId
   };
 
 
