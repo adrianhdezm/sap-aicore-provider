@@ -74,8 +74,12 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
     modelId: SapAiCoreModelId,
     settings: OpenAICompatibleChatSettings | BedrockChatSettings = {}
   ): LanguageModelV1 => {
-    const strategy = BEDROCK_MODEL_IDS.includes(modelId) ? bedrockStrategy : azureStrategy;
-    return strategy.createChatModel(modelId, settings as any);
+    if (OPENAI_MODEL_IDS.includes(modelId)) {
+      return azureStrategy.createChatModel(modelId, settings as any);
+    } else if (BEDROCK_MODEL_IDS.includes(modelId)) {
+      return bedrockStrategy.createChatModel(modelId, settings as any);
+    }
+    throw new Error(`Unsupported model ID: ${modelId}. Supported models are: ${[...OPENAI_MODEL_IDS, ...BEDROCK_MODEL_IDS].join(', ')}`);
   };
 
   const provider = (modelId: SapAiCoreModelId, settings?: OpenAICompatibleChatSettings | BedrockChatSettings) =>

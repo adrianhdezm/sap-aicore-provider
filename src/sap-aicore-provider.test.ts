@@ -5,6 +5,7 @@ import { describe, expect, it, beforeEach, afterEach } from 'vitest';
 
 const TEST_PROMPT: LanguageModelV1Prompt = [{ role: 'user', content: [{ type: 'text', text: 'Hello' }] }];
 const BASE_URL = `https://test-resource.openai.azure.com/openai/deployments/test-deployment`;
+const MODEL_ID = 'sap-aicore/gpt-4o';
 const ACCESS_TOKEN_BASE_URL = 'https://auth.example.com';
 const ACCESS_TOKEN_URL = `${ACCESS_TOKEN_BASE_URL}/oauth/token`;
 const BEDROCK_BASE_URL = 'https://bedrock.example.com';
@@ -91,7 +92,7 @@ describe('chat', () => {
         deploymentUrl: BASE_URL
       });
 
-      await provider('test-deployment').doGenerate({
+      await provider(MODEL_ID).doGenerate({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
         prompt: TEST_PROMPT
@@ -108,7 +109,7 @@ describe('chat', () => {
         }
       });
 
-      await provider('test-deployment').doGenerate({
+      await provider(MODEL_ID).doGenerate({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
         prompt: TEST_PROMPT,
@@ -131,7 +132,7 @@ describe('chat', () => {
         deploymentUrl: BASE_URL
       });
 
-      await provider('test-deployment').doGenerate({
+      await provider(MODEL_ID).doGenerate({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
         prompt: TEST_PROMPT
@@ -150,7 +151,7 @@ describe('chat', () => {
         }
       });
 
-      await provider('test-deployment').doGenerate({
+      await provider(MODEL_ID).doGenerate({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
         prompt: TEST_PROMPT
@@ -170,12 +171,12 @@ describe('chat', () => {
         }
       });
 
-      await provider('test-deployment').doGenerate({
+      await provider(MODEL_ID).doGenerate({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
         prompt: TEST_PROMPT
       });
-      await provider('test-deployment').doGenerate({
+      await provider(MODEL_ID).doGenerate({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
         prompt: TEST_PROMPT
@@ -193,7 +194,7 @@ describe('chat', () => {
         deploymentUrl: BASE_URL
       });
 
-      await provider('test-deployment').doGenerate({
+      await provider(MODEL_ID).doGenerate({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
         prompt: TEST_PROMPT
