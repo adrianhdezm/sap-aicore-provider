@@ -17,9 +17,9 @@ import {
   postJsonToApi
 } from '@ai-sdk/provider-utils';
 import { z } from 'zod';
-import { BEDROCK_STOP_REASONS, type BedrockConverseInput, type BedrockStopReason } from './converse-compatible-api-types.js';
+import { BEDROCK_STOP_REASONS, type ConverseCompatibleInput, type BedrockStopReason } from './converse-compatible-api-types.js';
 import { type ConverseCompatibleChatModelId, type ConverseCompatibleChatSettings } from './converse-compatible-chat-settings.js';
-import { BedrockErrorSchema } from './converse-compatible-error.js';
+import { ConverseCompatibleErrorSchema } from './converse-compatible-error.js';
 import { createConverseCompatibleEventStreamResponseHandler } from './converse-compatible-event-stream-response-handler.js';
 import { prepareTools } from './converse-compatible-prepare-tools.js';
 import { convertToConverseCompatibleChatMessages } from './convert-to-converse-compatible-chat-messages.js';
@@ -66,7 +66,7 @@ export class ConverseCompatibleChatLanguageModel implements LanguageModelV1 {
     seed,
     providerMetadata
   }: Parameters<LanguageModelV1['doGenerate']>[0]): {
-    command: BedrockConverseInput;
+    command: ConverseCompatibleInput;
     warnings: LanguageModelV1CallWarning[];
   } {
     const type = mode.type;
@@ -172,7 +172,7 @@ export class ConverseCompatibleChatLanguageModel implements LanguageModelV1 {
       });
     }
 
-    const baseArgs: BedrockConverseInput = {
+    const baseArgs: ConverseCompatibleInput = {
       system,
       additionalModelRequestFields: this.settings.additionalModelRequestFields,
       ...(Object.keys(inferenceConfig).length > 0 && {
@@ -239,7 +239,7 @@ export class ConverseCompatibleChatLanguageModel implements LanguageModelV1 {
       headers: combineHeaders(this.config.headers(), options.headers),
       body: args,
       failedResponseHandler: createJsonErrorResponseHandler({
-        errorSchema: BedrockErrorSchema,
+        errorSchema: ConverseCompatibleErrorSchema,
         errorToMessage: (error) => `${error.message ?? 'Unknown error'}`
       }),
       successfulResponseHandler: createJsonResponseHandler(BedrockResponseSchema),
@@ -320,7 +320,7 @@ export class ConverseCompatibleChatLanguageModel implements LanguageModelV1 {
       headers: combineHeaders(this.config.headers(), options.headers),
       body: args,
       failedResponseHandler: createJsonErrorResponseHandler({
-        errorSchema: BedrockErrorSchema,
+        errorSchema: ConverseCompatibleErrorSchema,
         errorToMessage: (error) => `${error.type}: ${error.message}`
       }),
       successfulResponseHandler: createConverseCompatibleEventStreamResponseHandler(BedrockStreamSchema),

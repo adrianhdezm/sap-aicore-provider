@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const BedrockErrorSchema = z.object({
+export const ConverseCompatibleErrorSchema = z.object({
   message: z.string(),
   type: z.string().nullish()
 });

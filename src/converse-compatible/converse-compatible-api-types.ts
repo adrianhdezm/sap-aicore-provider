@@ -1,6 +1,6 @@
 import { type JSONObject } from '@ai-sdk/provider';
 
-export interface BedrockConverseInput {
+export interface ConverseCompatibleInput {
   system?: BedrockSystemMessages;
   messages: BedrockMessages;
   toolConfig?: BedrockToolConfiguration;
