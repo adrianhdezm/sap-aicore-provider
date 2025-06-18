@@ -1,6 +1,6 @@
 import { OpenAICompatibleChatLanguageModel, type OpenAICompatibleChatSettings } from '@ai-sdk/openai-compatible';
 import type { FetchFunction } from '@ai-sdk/provider-utils';
-import type { SapAiCoreModelId } from '../azure-openai';
+import type { SapAiCoreModelId } from '../azure-openai/chat-model';
 import type { CompatibleChatLanguageModel } from '../compatible-chat-language-model';
 
 export type BedrockChatSettings = OpenAICompatibleChatSettings & Record<string, unknown>;

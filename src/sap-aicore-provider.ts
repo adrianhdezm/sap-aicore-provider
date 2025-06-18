@@ -1,12 +1,12 @@
 import type { LanguageModelV1 } from '@ai-sdk/provider';
-import type { SapAiCoreModelId } from './azure-openai';
-import { AzureOpenAICompatibleChatLanguageModel, type AzureOpenAICompatibleChatConfig, OPENAI_MODEL_IDS } from './azure-openai';
+import type { SapAiCoreModelId } from './azure-openai/chat-model';
+import { AzureOpenAICompatibleChatLanguageModel, type AzureOpenAICompatibleChatConfig, OPENAI_MODEL_IDS } from './azure-openai/chat-model';
 import {
   BedrockConverseCompatibleChatLanguageModel,
   type BedrockConverseCompatibleChatConfig,
   type BedrockChatSettings,
   BEDROCK_MODEL_IDS
-} from './bedrock-converse';
+} from './bedrock-converse/chat-model';
 import type { OpenAICompatibleChatSettings } from '@ai-sdk/openai-compatible';
 import { type FetchFunction, loadSetting } from '@ai-sdk/provider-utils';
 import { createFetchWithToken, type TokenProviderConfig } from './lib/fetch-with-token-provider';
@@ -86,4 +86,4 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
 
 export const sapAiCore = createSapAiCore();
 
-export type { SapAiCoreModelId } from './azure-openai';
+export type { SapAiCoreModelId } from './azure-openai/chat-model';
