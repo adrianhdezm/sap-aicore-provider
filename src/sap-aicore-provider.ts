@@ -76,7 +76,11 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
   const azureStrategy = new AzureOpenAICompatibleChatLanguageModel(azureConfig);
   const bedrockStrategy = new BedrockConverseCompatibleChatLanguageModel(bedrockConfig);
 
-  function isChatSettings(value: unknown): value is OpenAICompatibleChatSettings | BedrockChatSettings {
+  function isOpenAISettings(value: unknown): value is OpenAICompatibleChatSettings {
+    return !!value && typeof value === 'object';
+  }
+
+  function isBedrockSettings(value: unknown): value is BedrockChatSettings {
     return !!value && typeof value === 'object';
   }
 
@@ -84,17 +88,18 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
     modelId: SapAiCoreModelId,
     settings: OpenAICompatibleChatSettings | BedrockChatSettings = {}
   ): LanguageModelV1 => {
-    const opts = isChatSettings(settings) ? settings : {};
     if (isAzureOpenAIModelId(modelId)) {
-      return azureStrategy.createChatModel(modelId, opts as OpenAICompatibleChatSettings);
+      const opts = isOpenAISettings(settings) ? settings : {};
+      return azureStrategy.createChatModel(modelId, opts);
     } else if (isBedrockModelId(modelId)) {
-      return bedrockStrategy.createChatModel(modelId, opts as BedrockChatSettings);
+      const opts = isBedrockSettings(settings) ? settings : {};
+      return bedrockStrategy.createChatModel(modelId, opts);
     }
     throw new Error(`Unsupported model ID: ${modelId}. Supported models are: ${[...OPENAI_MODEL_IDS, ...BEDROCK_MODEL_IDS].join(', ')}`);
   };
 
   const provider = (modelId: SapAiCoreModelId, settings?: OpenAICompatibleChatSettings | BedrockChatSettings) =>
-    createChatModel(modelId, isChatSettings(settings) ? settings : {});
+    createChatModel(modelId, settings);
   provider.chat = createChatModel;
   return provider;
 }
