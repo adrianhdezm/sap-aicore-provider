@@ -1,12 +1,13 @@
-import { OpenAICompatibleChatLanguageModel, type OpenAICompatibleChatSettings } from '@ai-sdk/openai-compatible';
 import type { LanguageModelV1 } from '@ai-sdk/provider';
 import type { SapAiCoreModelId } from './azure-openai';
+import { AzureOpenAICompatibleChatLanguageModel, type AzureOpenAICompatibleChatConfig, OPENAI_MODEL_IDS } from './azure-openai';
 import {
   BedrockConverseCompatibleChatLanguageModel,
   type BedrockConverseCompatibleChatConfig,
   type BedrockChatSettings,
   BEDROCK_MODEL_IDS
 } from './bedrock-converse';
+import type { OpenAICompatibleChatSettings } from '@ai-sdk/openai-compatible';
 import { type FetchFunction, loadSetting } from '@ai-sdk/provider-utils';
 import { createFetchWithToken, type TokenProviderConfig } from './lib/fetch-with-token-provider';
 
@@ -52,6 +53,13 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
   // Wrap the fetch function with token provider options
   const fetch = createFetchWithToken(options.tokenProvider, options.fetch);
 
+  const azureConfig: AzureOpenAICompatibleChatConfig = {
+    provider: 'sap-aicore.chat',
+    url: openaiUrl,
+    headers: getHeaders,
+    fetch
+  };
+
   const bedrockConfig: BedrockConverseCompatibleChatConfig = {
     provider: 'sap-aicore.chat',
     baseUrl: bedrockBaseUrl,
@@ -59,20 +67,15 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
     fetch
   };
 
+  const azureStrategy = new AzureOpenAICompatibleChatLanguageModel(azureConfig);
+  const bedrockStrategy = new BedrockConverseCompatibleChatLanguageModel(bedrockConfig);
+
   const createChatModel = (
     modelId: SapAiCoreModelId,
     settings: OpenAICompatibleChatSettings | BedrockChatSettings = {}
   ): LanguageModelV1 => {
-    if (!BEDROCK_MODEL_IDS.includes(modelId)) {
-      return new OpenAICompatibleChatLanguageModel(modelId, settings as OpenAICompatibleChatSettings, {
-        provider: 'sap-aicore.chat',
-        url: openaiUrl,
-        headers: getHeaders,
-        fetch,
-        supportsStructuredOutputs: true
-      });
-    }
-    return new BedrockConverseCompatibleChatLanguageModel(modelId, settings as BedrockChatSettings, bedrockConfig);
+    const strategy = BEDROCK_MODEL_IDS.includes(modelId) ? bedrockStrategy : azureStrategy;
+    return strategy.createChatModel(modelId, settings as any);
   };
 
   const provider = (modelId: SapAiCoreModelId, settings?: OpenAICompatibleChatSettings | BedrockChatSettings) =>
