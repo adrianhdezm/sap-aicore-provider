@@ -26,4 +26,15 @@ export class BedrockConverseCompatibleChatLanguageModel implements CompatibleCha
   }
 }
 
-export const BEDROCK_MODEL_IDS: SapAiCoreModelId[] = ['sap-aicore/o3', 'sap-aicore/o3-mini', 'sap-aicore/o1', 'sap-aicore/o4-mini'];
+export const BEDROCK_MODEL_IDS = [
+  'sap-aicore/o3',
+  'sap-aicore/o3-mini',
+  'sap-aicore/o1',
+  'sap-aicore/o4-mini'
+] as const satisfies readonly SapAiCoreModelId[];
+
+export type BedrockModelId = (typeof BEDROCK_MODEL_IDS)[number];
+
+export function isBedrockModelId(modelId: SapAiCoreModelId): modelId is BedrockModelId {
+  return (BEDROCK_MODEL_IDS as readonly string[]).includes(modelId);
+}

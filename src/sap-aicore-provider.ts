@@ -1,11 +1,17 @@
 import type { LanguageModelV1 } from '@ai-sdk/provider';
 import type { SapAiCoreModelId } from './azure-openai/chat-model';
-import { AzureOpenAICompatibleChatLanguageModel, type AzureOpenAICompatibleChatConfig, OPENAI_MODEL_IDS } from './azure-openai/chat-model';
+import {
+  AzureOpenAICompatibleChatLanguageModel,
+  type AzureOpenAICompatibleChatConfig,
+  OPENAI_MODEL_IDS,
+  isAzureOpenAIModelId
+} from './azure-openai/chat-model';
 import {
   BedrockConverseCompatibleChatLanguageModel,
   type BedrockConverseCompatibleChatConfig,
   type BedrockChatSettings,
-  BEDROCK_MODEL_IDS
+  BEDROCK_MODEL_IDS,
+  isBedrockModelId
 } from './bedrock-converse/chat-model';
 import type { OpenAICompatibleChatSettings } from '@ai-sdk/openai-compatible';
 import { type FetchFunction, loadSetting } from '@ai-sdk/provider-utils';
@@ -70,20 +76,25 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
   const azureStrategy = new AzureOpenAICompatibleChatLanguageModel(azureConfig);
   const bedrockStrategy = new BedrockConverseCompatibleChatLanguageModel(bedrockConfig);
 
+  function isChatSettings(value: unknown): value is OpenAICompatibleChatSettings | BedrockChatSettings {
+    return !!value && typeof value === 'object';
+  }
+
   const createChatModel = (
     modelId: SapAiCoreModelId,
     settings: OpenAICompatibleChatSettings | BedrockChatSettings = {}
   ): LanguageModelV1 => {
-    if (OPENAI_MODEL_IDS.includes(modelId)) {
-      return azureStrategy.createChatModel(modelId, settings as any);
-    } else if (BEDROCK_MODEL_IDS.includes(modelId)) {
-      return bedrockStrategy.createChatModel(modelId, settings as any);
+    const opts = isChatSettings(settings) ? settings : {};
+    if (isAzureOpenAIModelId(modelId)) {
+      return azureStrategy.createChatModel(modelId, opts as OpenAICompatibleChatSettings);
+    } else if (isBedrockModelId(modelId)) {
+      return bedrockStrategy.createChatModel(modelId, opts as BedrockChatSettings);
     }
     throw new Error(`Unsupported model ID: ${modelId}. Supported models are: ${[...OPENAI_MODEL_IDS, ...BEDROCK_MODEL_IDS].join(', ')}`);
   };
 
   const provider = (modelId: SapAiCoreModelId, settings?: OpenAICompatibleChatSettings | BedrockChatSettings) =>
-    createChatModel(modelId, settings);
+    createChatModel(modelId, isChatSettings(settings) ? settings : {});
   provider.chat = createChatModel;
   return provider;
 }

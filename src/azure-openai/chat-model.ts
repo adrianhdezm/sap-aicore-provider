@@ -14,13 +14,19 @@ export type SapAiCoreModelId =
   | 'sap-aicore/o4-mini'
   | (string & {});
 
-export const OPENAI_MODEL_IDS: SapAiCoreModelId[] = [
+export const OPENAI_MODEL_IDS = [
   'sap-aicore/gpt-4o',
   'sap-aicore/gpt-4o-mini',
   'sap-aicore/gpt-4.1',
   'sap-aicore/gpt-4.1-nano',
   'sap-aicore/gpt-4.1-mini'
-];
+] as const satisfies readonly SapAiCoreModelId[];
+
+export type AzureOpenAIModelId = (typeof OPENAI_MODEL_IDS)[number];
+
+export function isAzureOpenAIModelId(modelId: SapAiCoreModelId): modelId is AzureOpenAIModelId {
+  return (OPENAI_MODEL_IDS as readonly string[]).includes(modelId);
+}
 
 export interface AzureOpenAICompatibleChatConfig {
   provider: string;
