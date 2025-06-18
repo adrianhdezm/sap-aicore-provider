@@ -65,6 +65,7 @@ const model = new BedrockCompatibleChatLanguageModel(
   modelId,
   {},
   {
+    provider: 'sap-aicore.chat',
     baseUrl: () => baseUrl,
     headers: {},
     fetch: fakeFetchWithAuth,
@@ -770,6 +771,7 @@ describe('doStream', () => {
       modelId,
       {},
       {
+        provider: 'sap-aicore.chat',
         baseUrl: () => baseUrl,
         headers: {
           'model-header': 'model-value',
@@ -807,6 +809,7 @@ describe('doStream', () => {
       modelId,
       {},
       {
+        provider: 'sap-aicore.chat',
         baseUrl: () => baseUrl,
         headers: {
           'model-header': 'model-value'
@@ -1401,6 +1404,7 @@ describe('doGenerate', () => {
       modelId,
       {},
       {
+        provider: 'sap-aicore.chat',
         baseUrl: () => baseUrl,
         headers: {
           'model-header': 'model-value',
@@ -1439,6 +1443,7 @@ describe('doGenerate', () => {
       modelId,
       {},
       {
+        provider: 'sap-aicore.chat',
         baseUrl: () => baseUrl,
         headers: {
           'model-header': 'model-value'
