@@ -1,5 +1,4 @@
 import type { LanguageModelV1 } from '@ai-sdk/provider';
-import type { SapAiCoreModelId } from './azure-openai/chat-model';
 import {
   AzureOpenAICompatibleChatLanguageModel,
   type AzureOpenAICompatibleChatConfig,
@@ -18,6 +17,8 @@ import { type FetchFunction, loadSetting } from '@ai-sdk/provider-utils';
 import { createFetchWithToken, type TokenProviderConfig } from './lib/fetch-with-token-provider';
 
 export const AZURE_OPENAI_API_VERSION = '2025-04-01-preview';
+
+export type SapAiCoreModelId = (typeof OPENAI_MODEL_IDS)[number] | (typeof BEDROCK_MODEL_IDS)[number];
 
 export interface SapAiCoreProvider {
   (modelId: SapAiCoreModelId, settings?: OpenAICompatibleChatSettings): LanguageModelV1;
@@ -105,5 +106,3 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
 }
 
 export const sapAiCore = createSapAiCore();
-
-export type { SapAiCoreModelId } from './azure-openai/chat-model';

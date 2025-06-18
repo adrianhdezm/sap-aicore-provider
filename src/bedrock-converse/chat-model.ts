@@ -1,6 +1,5 @@
 import { OpenAICompatibleChatLanguageModel, type OpenAICompatibleChatSettings } from '@ai-sdk/openai-compatible';
 import type { FetchFunction } from '@ai-sdk/provider-utils';
-import type { SapAiCoreModelId } from '../azure-openai/chat-model';
 import type { CompatibleChatLanguageModel } from '../compatible-chat-language-model';
 
 export type BedrockChatSettings = OpenAICompatibleChatSettings & Record<string, unknown>;
@@ -33,10 +32,10 @@ export const BEDROCK_MODEL_IDS = [
   'anthropic--claude-4-sonnet',
   'anthropic--claude-3.5-sonnet',
   'anthropic--claude-3.7-sonnet'
-] as const satisfies readonly SapAiCoreModelId[];
+] as const;
 
 export type BedrockModelId = (typeof BEDROCK_MODEL_IDS)[number];
 
-export function isBedrockModelId(modelId: SapAiCoreModelId): modelId is BedrockModelId {
+export function isBedrockModelId(modelId: string): modelId is BedrockModelId {
   return (BEDROCK_MODEL_IDS as readonly string[]).includes(modelId);
 }
