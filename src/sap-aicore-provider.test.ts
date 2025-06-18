@@ -4,7 +4,7 @@ import { AZURE_OPENAI_API_VERSION, createSapAiCore } from './sap-aicore-provider
 import { describe, expect, it, beforeEach, afterEach } from 'vitest';
 
 const TEST_PROMPT: LanguageModelV1Prompt = [{ role: 'user', content: [{ type: 'text', text: 'Hello' }] }];
-const BASE_URL = `https://test-resource.openai.azure.com/openai/deployments/test-deployment`;
+const BASE_URL = `https://test-resource.openai.azure.com/openai/deployments/sap-aicore/test-model`;
 const ACCESS_TOKEN_BASE_URL = 'https://auth.example.com';
 const ACCESS_TOKEN_URL = `${ACCESS_TOKEN_BASE_URL}/oauth/token`;
 const server = createTestServer({
@@ -67,7 +67,7 @@ describe('chat', () => {
         deploymentUrl: BASE_URL
       });
 
-      await provider('test-deployment').doGenerate({
+      await provider('sap-aicore/test-model').doGenerate({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
         prompt: TEST_PROMPT
@@ -84,7 +84,7 @@ describe('chat', () => {
         }
       });
 
-      await provider('test-deployment').doGenerate({
+      await provider('sap-aicore/test-model').doGenerate({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
         prompt: TEST_PROMPT,
@@ -107,7 +107,7 @@ describe('chat', () => {
         deploymentUrl: BASE_URL
       });
 
-      await provider('test-deployment').doGenerate({
+      await provider('sap-aicore/test-model').doGenerate({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
         prompt: TEST_PROMPT
@@ -126,7 +126,7 @@ describe('chat', () => {
         }
       });
 
-      await provider('test-deployment').doGenerate({
+      await provider('sap-aicore/test-model').doGenerate({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
         prompt: TEST_PROMPT
@@ -146,12 +146,12 @@ describe('chat', () => {
         }
       });
 
-      await provider('test-deployment').doGenerate({
+      await provider('sap-aicore/test-model').doGenerate({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
         prompt: TEST_PROMPT
       });
-      await provider('test-deployment').doGenerate({
+      await provider('sap-aicore/test-model').doGenerate({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
         prompt: TEST_PROMPT
@@ -169,7 +169,7 @@ describe('chat', () => {
         deploymentUrl: BASE_URL
       });
 
-      await provider('test-deployment').doGenerate({
+      await provider('sap-aicore/test-model').doGenerate({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
         prompt: TEST_PROMPT
