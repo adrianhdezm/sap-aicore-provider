@@ -1,5 +1,9 @@
 import type { LanguageModelV1 } from '@ai-sdk/provider';
-import { createAzureOpenAIChatModel, type AzureOpenAIChatConfig, AZURE_OPENAI_MODEL_IDS } from './azure-openai/chat-model';
+import {
+  AZURE_OPENAI_MODEL_IDS,
+  type AzureOpenAIChatConfig
+} from './azure-openai/chat-model';
+import { OpenAICompatibleChatLanguageModel } from '@ai-sdk/openai-compatible';
 import { BedrockCompatibleChatLanguageModel } from './amazon-bedrock/bedrock-compatible-chat-language-model';
 import type { OpenAICompatibleChatSettings } from '@ai-sdk/openai-compatible';
 import { type FetchFunction, loadSetting, generateId } from '@ai-sdk/provider-utils';
@@ -70,10 +74,16 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
     settings: OpenAICompatibleChatSettings | BedrockChatConfig = {}
   ): LanguageModelV1 => {
     if ((AZURE_OPENAI_MODEL_IDS as readonly string[]).includes(modelId)) {
-      return createAzureOpenAIChatModel(
+      return new OpenAICompatibleChatLanguageModel(
         modelId,
         settings as OpenAICompatibleChatSettings,
-        azureConfig
+        {
+          provider: azureConfig.provider,
+          url: azureConfig.url,
+          headers: azureConfig.headers,
+          fetch: azureConfig.fetch,
+          supportsStructuredOutputs: true
+        }
       );
     } else if ((BEDROCK_CHAT_MODEL_IDS as readonly string[]).includes(modelId)) {
       return new BedrockCompatibleChatLanguageModel(modelId, settings as BedrockChatConfig, {

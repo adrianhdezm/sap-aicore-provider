@@ -1,5 +1,5 @@
-import { OpenAICompatibleChatLanguageModel, type OpenAICompatibleChatSettings } from '@ai-sdk/openai-compatible';
 import type { FetchFunction } from '@ai-sdk/provider-utils';
+import type { OpenAICompatibleChatSettings } from '@ai-sdk/openai-compatible';
 
 export const AZURE_OPENAI_MODEL_IDS = [
   'sap-aicore/gpt-4o',
@@ -22,16 +22,3 @@ export interface AzureOpenAIChatConfig {
   fetch?: FetchFunction;
 }
 
-export function createAzureOpenAIChatModel(
-  modelId: string,
-  settings: OpenAICompatibleChatSettings,
-  config: AzureOpenAIChatConfig
-) {
-  return new OpenAICompatibleChatLanguageModel(modelId, settings, {
-    provider: config.provider,
-    url: config.url,
-    headers: config.headers,
-    fetch: config.fetch,
-    supportsStructuredOutputs: true
-  });
-}
