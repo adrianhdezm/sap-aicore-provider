@@ -12,6 +12,12 @@ export type SapAiCoreModelId =
   | 'sap-aicore/o3-mini'
   | 'sap-aicore/o1'
   | 'sap-aicore/o4-mini'
+  | 'anthropic--claude-3-haiku'
+  | 'anthropic--claude-3-opus'
+  | 'anthropic--claude-3-sonnet'
+  | 'anthropic--claude-4-sonnet'
+  | 'anthropic--claude-3.5-sonnet'
+  | 'anthropic--claude-3.7-sonnet'
   | (string & {});
 
 export const OPENAI_MODEL_IDS = [
@@ -19,7 +25,11 @@ export const OPENAI_MODEL_IDS = [
   'sap-aicore/gpt-4o-mini',
   'sap-aicore/gpt-4.1',
   'sap-aicore/gpt-4.1-nano',
-  'sap-aicore/gpt-4.1-mini'
+  'sap-aicore/gpt-4.1-mini',
+  'sap-aicore/o3',
+  'sap-aicore/o3-mini',
+  'sap-aicore/o1',
+  'sap-aicore/o4-mini'
 ] as const satisfies readonly SapAiCoreModelId[];
 
 export type AzureOpenAIModelId = (typeof OPENAI_MODEL_IDS)[number];

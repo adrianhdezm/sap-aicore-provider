@@ -27,10 +27,12 @@ export class BedrockConverseCompatibleChatLanguageModel implements CompatibleCha
 }
 
 export const BEDROCK_MODEL_IDS = [
-  'sap-aicore/o3',
-  'sap-aicore/o3-mini',
-  'sap-aicore/o1',
-  'sap-aicore/o4-mini'
+  'anthropic--claude-3-haiku',
+  'anthropic--claude-3-opus',
+  'anthropic--claude-3-sonnet',
+  'anthropic--claude-4-sonnet',
+  'anthropic--claude-3.5-sonnet',
+  'anthropic--claude-3.7-sonnet'
 ] as const satisfies readonly SapAiCoreModelId[];
 
 export type BedrockModelId = (typeof BEDROCK_MODEL_IDS)[number];

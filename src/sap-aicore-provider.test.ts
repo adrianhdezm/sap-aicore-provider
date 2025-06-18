@@ -9,7 +9,8 @@ const MODEL_ID = 'sap-aicore/gpt-4o';
 const ACCESS_TOKEN_BASE_URL = 'https://auth.example.com';
 const ACCESS_TOKEN_URL = `${ACCESS_TOKEN_BASE_URL}/oauth/token`;
 const BEDROCK_BASE_URL = 'https://bedrock.example.com';
-const BEDROCK_URL = `${BEDROCK_BASE_URL}/model/${encodeURIComponent('sap-aicore/o3')}/converse`;
+const BEDROCK_MODEL_ID = 'anthropic--claude-3-haiku';
+const BEDROCK_URL = `${BEDROCK_BASE_URL}/model/${encodeURIComponent(BEDROCK_MODEL_ID)}/converse`;
 const server = createTestServer({
   [`${BASE_URL}/chat/completions`]: {},
   [ACCESS_TOKEN_URL]: {},
@@ -208,7 +209,7 @@ describe('chat', () => {
         deploymentUrl: BEDROCK_BASE_URL
       });
 
-      await provider('sap-aicore/o3').doGenerate({
+      await provider(BEDROCK_MODEL_ID).doGenerate({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
         prompt: TEST_PROMPT
