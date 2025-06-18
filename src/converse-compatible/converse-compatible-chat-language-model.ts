@@ -17,7 +17,7 @@ import {
   postJsonToApi
 } from '@ai-sdk/provider-utils';
 import { z } from 'zod';
-import { BEDROCK_STOP_REASONS, type ConverseCompatibleInput, type BedrockStopReason } from './converse-compatible-api-types.js';
+import { BEDROCK_STOP_REASONS, type ConverseCompatibleInput, type ConverseStopReason } from './converse-compatible-api-types.js';
 import { type ConverseCompatibleChatModelId, type ConverseCompatibleChatSettings } from './converse-compatible-chat-settings.js';
 import { ConverseCompatibleErrorSchema } from './converse-compatible-error.js';
 import { createConverseCompatibleEventStreamResponseHandler } from './converse-compatible-event-stream-response-handler.js';
@@ -112,7 +112,7 @@ export class ConverseCompatibleChatLanguageModel implements LanguageModelV1 {
     const { system, messages } = convertToConverseCompatibleChatMessages(prompt);
 
     // Parse thinking options from provider metadata
-    const reasoningConfigOptions = BedrockReasoningConfigOptionsSchema.safeParse(
+    const reasoningConfigOptions = ConverseReasoningConfigOptionsSchema.safeParse(
       providerMetadata?.[this.providerOptionsName]?.reasoning_config
     );
 
@@ -242,7 +242,7 @@ export class ConverseCompatibleChatLanguageModel implements LanguageModelV1 {
         errorSchema: ConverseCompatibleErrorSchema,
         errorToMessage: (error) => `${error.message ?? 'Unknown error'}`
       }),
-      successfulResponseHandler: createJsonResponseHandler(BedrockResponseSchema),
+      successfulResponseHandler: createJsonResponseHandler(ConverseResponseSchema),
       abortSignal: options.abortSignal,
       fetch: this.config.fetch
     });
@@ -298,7 +298,7 @@ export class ConverseCompatibleChatLanguageModel implements LanguageModelV1 {
           toolName: part.toolUse?.name ?? `tool-${this.config.generateId()}`,
           args: JSON.stringify(part.toolUse?.input ?? '')
         })),
-      finishReason: mapConverseCompatibleFinishReason(response.stopReason as BedrockStopReason),
+      finishReason: mapConverseCompatibleFinishReason(response.stopReason as ConverseStopReason),
       usage: {
         promptTokens: response.usage?.inputTokens ?? Number.NaN,
         completionTokens: response.usage?.outputTokens ?? Number.NaN
@@ -323,7 +323,7 @@ export class ConverseCompatibleChatLanguageModel implements LanguageModelV1 {
         errorSchema: ConverseCompatibleErrorSchema,
         errorToMessage: (error) => `${error.type}: ${error.message}`
       }),
-      successfulResponseHandler: createConverseCompatibleEventStreamResponseHandler(BedrockStreamSchema),
+      successfulResponseHandler: createConverseCompatibleEventStreamResponseHandler(ConverseStreamSchema),
       abortSignal: options.abortSignal,
       fetch: this.config.fetch
     });
@@ -350,7 +350,7 @@ export class ConverseCompatibleChatLanguageModel implements LanguageModelV1 {
 
     return {
       stream: response.pipeThrough(
-        new TransformStream<ParseResult<z.infer<typeof BedrockStreamSchema>>, LanguageModelV1StreamPart>({
+        new TransformStream<ParseResult<z.infer<typeof ConverseStreamSchema>>, LanguageModelV1StreamPart>({
           transform(chunk, controller) {
             function enqueueError(bedrockError: Record<string, any>) {
               finishReason = 'error';
@@ -384,7 +384,7 @@ export class ConverseCompatibleChatLanguageModel implements LanguageModelV1 {
             }
 
             if (value.messageStop) {
-              finishReason = mapConverseCompatibleFinishReason(value.messageStop.stopReason as BedrockStopReason);
+              finishReason = mapConverseCompatibleFinishReason(value.messageStop.stopReason as ConverseStopReason);
             }
 
             if (value.metadata) {
@@ -512,7 +512,7 @@ export class ConverseCompatibleChatLanguageModel implements LanguageModelV1 {
   }
 }
 
-const BedrockReasoningConfigOptionsSchema = z
+const ConverseReasoningConfigOptionsSchema = z
   .object({
     type: z.union([z.literal('enabled'), z.literal('disabled')]).nullish(),
     budget_tokens: z.number().nullish(),
@@ -520,26 +520,26 @@ const BedrockReasoningConfigOptionsSchema = z
   })
   .nullish();
 
-const BedrockStopReasonSchema = z.union([z.enum(BEDROCK_STOP_REASONS), z.string()]);
+const ConverseStopReasonSchema = z.union([z.enum(BEDROCK_STOP_REASONS), z.string()]);
 
-const BedrockToolUseSchema = z.object({
+const ConverseToolUseSchema = z.object({
   toolUseId: z.string(),
   name: z.string(),
   input: z.unknown()
 });
 
-const BedrockReasoningTextSchema = z.object({
+const ConverseReasoningTextSchema = z.object({
   signature: z.string().nullish(),
   text: z.string()
 });
 
-const BedrockRedactedReasoningSchema = z.object({
+const ConverseRedactedReasoningSchema = z.object({
   data: z.string()
 });
 
 // limited version of the schema, focused on what is needed for the implementation
 // this approach limits breakages when the API changes and increases efficiency
-const BedrockResponseSchema = z.object({
+const ConverseResponseSchema = z.object({
   metrics: z
     .object({
       latencyMs: z.number()
@@ -550,14 +550,14 @@ const BedrockResponseSchema = z.object({
       content: z.array(
         z.object({
           text: z.string().nullish(),
-          toolUse: BedrockToolUseSchema.nullish(),
+          toolUse: ConverseToolUseSchema.nullish(),
           reasoningContent: z
             .union([
               z.object({
-                reasoningText: BedrockReasoningTextSchema
+                reasoningText: ConverseReasoningTextSchema
               }),
               z.object({
-                redactedReasoning: BedrockRedactedReasoningSchema
+                redactedReasoning: ConverseRedactedReasoningSchema
               })
             ])
             .nullish()
@@ -566,7 +566,7 @@ const BedrockResponseSchema = z.object({
       role: z.string()
     })
   }),
-  stopReason: BedrockStopReasonSchema,
+  stopReason: ConverseStopReasonSchema,
   trace: z.unknown().nullish(),
   usage: z.object({
     inputTokens: z.number(),
@@ -579,7 +579,7 @@ const BedrockResponseSchema = z.object({
 
 // limited version of the schema, focussed on what is needed for the implementation
 // this approach limits breakages when the API changes and increases efficiency
-const BedrockStreamSchema = z.object({
+const ConverseStreamSchema = z.object({
   contentBlockDelta: z
     .object({
       contentBlockIndex: z.number(),
@@ -607,7 +607,7 @@ const BedrockStreamSchema = z.object({
       contentBlockIndex: z.number(),
       start: z
         .object({
-          toolUse: BedrockToolUseSchema.nullish()
+          toolUse: ConverseToolUseSchema.nullish()
         })
         .nullish()
     })
@@ -621,7 +621,7 @@ const BedrockStreamSchema = z.object({
   messageStop: z
     .object({
       additionalModelResponseFields: z.record(z.unknown()).nullish(),
-      stopReason: BedrockStopReasonSchema
+      stopReason: ConverseStopReasonSchema
     })
     .nullish(),
   metadata: z

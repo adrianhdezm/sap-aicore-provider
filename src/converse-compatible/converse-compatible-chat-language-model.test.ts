@@ -2,7 +2,7 @@ import { type LanguageModelV1Prompt } from '@ai-sdk/provider';
 import { createTestServer, convertReadableStreamToArray } from '@ai-sdk/provider-utils/test';
 import { ConverseCompatibleChatLanguageModel } from './converse-compatible-chat-language-model';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { type BedrockReasoningContentBlock, type BedrockRedactedReasoningContentBlock } from './converse-compatible-api-types';
+import { type ConverseReasoningContentBlock, type ConverseRedactedReasoningContentBlock } from './converse-compatible-api-types';
 
 const TEST_PROMPT: LanguageModelV1Prompt = [
   { role: 'system', content: 'System Prompt' },
@@ -1069,8 +1069,8 @@ describe('doGenerate', () => {
       | { type: 'text'; text: string }
       | { type: 'thinking'; thinking: string; signature: string }
       | { type: 'tool_use'; id: string; name: string; input: unknown }
-      | BedrockReasoningContentBlock
-      | BedrockRedactedReasoningContentBlock
+      | ConverseReasoningContentBlock
+      | ConverseRedactedReasoningContentBlock
     >;
     toolCalls?: Array<{
       id?: string;
@@ -1087,9 +1087,9 @@ describe('doGenerate', () => {
     stopReason?: string;
     trace?: typeof mockTrace;
     reasoningContent?:
-      | BedrockReasoningContentBlock
-      | BedrockRedactedReasoningContentBlock
-      | Array<BedrockReasoningContentBlock | BedrockRedactedReasoningContentBlock>;
+      | ConverseReasoningContentBlock
+      | ConverseRedactedReasoningContentBlock
+      | Array<ConverseReasoningContentBlock | ConverseRedactedReasoningContentBlock>;
   }) {
     server.urls[generateUrl]!.response = {
       type: 'json-value',

@@ -1,12 +1,12 @@
 import { type JSONObject, type LanguageModelV1, type LanguageModelV1CallWarning, UnsupportedFunctionalityError } from '@ai-sdk/provider';
-import { type BedrockTool, type BedrockToolConfiguration } from './converse-compatible-api-types.js';
+import { type ConverseTool, type ConverseToolConfiguration } from './converse-compatible-api-types.js';
 
 export function prepareTools(
   mode: Parameters<LanguageModelV1['doGenerate']>[0]['mode'] & {
     type: 'regular';
   }
 ): {
-  toolConfig: BedrockToolConfiguration; // note: do not rename, name required by Bedrock
+  toolConfig: ConverseToolConfiguration; // note: do not rename, name required by Converse
   toolWarnings: LanguageModelV1CallWarning[];
 } {
   // when the tools array is empty, change it to undefined to prevent errors:
@@ -20,7 +20,7 @@ export function prepareTools(
   }
 
   const toolWarnings: LanguageModelV1CallWarning[] = [];
-  const bedrockTools: BedrockTool[] = [];
+  const bedrockTools: ConverseTool[] = [];
 
   for (const tool of tools) {
     if (tool.type === 'provider-defined') {
@@ -61,7 +61,7 @@ export function prepareTools(
         toolWarnings
       };
     case 'none':
-      // Bedrock does not support 'none' tool choice, so we remove the tools:
+      // Converse does not support 'none' tool choice, so we remove the tools:
       return {
         toolConfig: { tools: undefined, toolChoice: undefined },
         toolWarnings

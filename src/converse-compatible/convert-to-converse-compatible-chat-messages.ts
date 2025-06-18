@@ -1,12 +1,12 @@
 import {
   BEDROCK_CACHE_POINT,
-  type BedrockAssistantMessage,
-  type BedrockCachePoint,
-  type BedrockDocumentFormat,
-  type BedrockImageFormat,
-  type BedrockMessages,
-  type BedrockSystemMessages,
-  type BedrockUserMessage
+  type ConverseAssistantMessage,
+  type ConverseCachePoint,
+  type ConverseDocumentFormat,
+  type ConverseImageFormat,
+  type ConverseMessages,
+  type ConverseSystemMessages,
+  type ConverseUserMessage
 } from './converse-compatible-api-types';
 import {
   type JSONObject,
@@ -19,18 +19,18 @@ import { convertUint8ArrayToBase64, createIdGenerator } from '@ai-sdk/provider-u
 
 const generateFileId = createIdGenerator({ prefix: 'file', size: 16 });
 
-function getCachePoint(providerMetadata: LanguageModelV1ProviderMetadata | undefined): BedrockCachePoint | undefined {
-  return providerMetadata?.bedrock?.cachePoint as BedrockCachePoint | undefined;
+function getCachePoint(providerMetadata: LanguageModelV1ProviderMetadata | undefined): ConverseCachePoint | undefined {
+  return providerMetadata?.bedrock?.cachePoint as ConverseCachePoint | undefined;
 }
 
 export function convertToConverseCompatibleChatMessages(prompt: LanguageModelV1Prompt): {
-  system: BedrockSystemMessages;
-  messages: BedrockMessages;
+  system: ConverseSystemMessages;
+  messages: ConverseMessages;
 } {
   const blocks = groupIntoBlocks(prompt);
 
-  let system: BedrockSystemMessages = [];
-  const messages: BedrockMessages = [];
+  let system: ConverseSystemMessages = [];
+  const messages: ConverseMessages = [];
 
   for (let i = 0; i < blocks.length; i++) {
     const block = blocks[i]!;
@@ -56,7 +56,7 @@ export function convertToConverseCompatibleChatMessages(prompt: LanguageModelV1P
 
       case 'user': {
         // combines all user and tool messages in this block into a single message:
-        const bedrockContent: BedrockUserMessage['content'] = [];
+        const bedrockContent: ConverseUserMessage['content'] = [];
 
         for (const message of block.messages) {
           const { role, content, providerMetadata } = message;
@@ -82,7 +82,7 @@ export function convertToConverseCompatibleChatMessages(prompt: LanguageModelV1P
 
                     bedrockContent.push({
                       image: {
-                        format: part.mimeType?.split('/')?.[1] as BedrockImageFormat,
+                        format: part.mimeType?.split('/')?.[1] as ConverseImageFormat,
                         source: {
                           bytes: convertUint8ArrayToBase64(part.image ?? (part.image as Uint8Array))
                         }
@@ -101,7 +101,7 @@ export function convertToConverseCompatibleChatMessages(prompt: LanguageModelV1P
 
                     bedrockContent.push({
                       document: {
-                        format: part.mimeType?.split('/')?.[1] as BedrockDocumentFormat,
+                        format: part.mimeType?.split('/')?.[1] as ConverseDocumentFormat,
                         name: generateFileId(),
                         source: {
                           bytes: part.data
@@ -132,7 +132,7 @@ export function convertToConverseCompatibleChatMessages(prompt: LanguageModelV1P
                               throw new Error('Image mime type is required in tool result part content');
                             }
                             const format = part.mimeType.split('/')[1] || '';
-                            if (!isBedrockImageFormat(format)) {
+                            if (!isConverseImageFormat(format)) {
                               throw new Error(`Unsupported image format: ${format}`);
                             }
                             return {
@@ -175,7 +175,7 @@ export function convertToConverseCompatibleChatMessages(prompt: LanguageModelV1P
 
       case 'assistant': {
         // combines multiple assistant messages in this block into a single message:
-        const bedrockContent: BedrockAssistantMessage['content'] = [];
+        const bedrockContent: ConverseAssistantMessage['content'] = [];
 
         for (let j = 0; j < block.messages.length; j++) {
           const message = block.messages[j]!;
@@ -191,7 +191,7 @@ export function convertToConverseCompatibleChatMessages(prompt: LanguageModelV1P
                 bedrockContent.push({
                   text:
                     // trim the last text part if it's the last message in the block
-                    // because Bedrock does not allow trailing whitespace
+                    // because Converse does not allow trailing whitespace
                     // in pre-filled assistant responses
                     trimIfLast(isLastBlock, isLastMessage, isLastContentPart, part.text)
                 });
@@ -203,7 +203,7 @@ export function convertToConverseCompatibleChatMessages(prompt: LanguageModelV1P
                   reasoningContent: {
                     reasoningText: {
                       // trim the last text part if it's the last message in the block
-                      // because Bedrock does not allow trailing whitespace
+                      // because Converse does not allow trailing whitespace
                       // in pre-filled assistant responses
                       text: trimIfLast(isLastBlock, isLastMessage, isLastContentPart, part.text),
                       signature: part.signature
@@ -256,7 +256,7 @@ export function convertToConverseCompatibleChatMessages(prompt: LanguageModelV1P
   return { system, messages };
 }
 
-function isBedrockImageFormat(format: string): format is BedrockImageFormat {
+function isConverseImageFormat(format: string): format is ConverseImageFormat {
   return ['jpeg', 'png', 'gif'].includes(format);
 }
 

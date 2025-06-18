@@ -1,9 +1,9 @@
 import { type JSONObject } from '@ai-sdk/provider';
 
 export interface ConverseCompatibleInput {
-  system?: BedrockSystemMessages;
-  messages: BedrockMessages;
-  toolConfig?: BedrockToolConfiguration;
+  system?: ConverseSystemMessages;
+  messages: ConverseMessages;
+  toolConfig?: ConverseToolConfiguration;
   inferenceConfig?: {
     maxTokens?: number;
     temperature?: number;
@@ -11,31 +11,31 @@ export interface ConverseCompatibleInput {
     stopSequences?: string[];
   };
   additionalModelRequestFields?: Record<string, unknown>;
-  guardrailConfig?: BedrockGuardrailConfiguration | BedrockGuardrailStreamConfiguration | undefined;
+  guardrailConfig?: ConverseGuardrailConfiguration | ConverseGuardrailStreamConfiguration | undefined;
 }
 
-export type BedrockSystemMessages = Array<BedrockSystemContentBlock>;
+export type ConverseSystemMessages = Array<ConverseSystemContentBlock>;
 
-export type BedrockMessages = Array<BedrockAssistantMessage | BedrockUserMessage>;
+export type ConverseMessages = Array<ConverseAssistantMessage | ConverseUserMessage>;
 
-export interface BedrockAssistantMessage {
+export interface ConverseAssistantMessage {
   role: 'assistant';
-  content: Array<BedrockContentBlock>;
+  content: Array<ConverseContentBlock>;
 }
 
-export interface BedrockUserMessage {
+export interface ConverseUserMessage {
   role: 'user';
-  content: Array<BedrockContentBlock>;
+  content: Array<ConverseContentBlock>;
 }
 
 export const BEDROCK_CACHE_POINT = {
   cachePoint: { type: 'default' }
 } as const;
 
-export type BedrockCachePoint = { cachePoint: { type: 'default' } };
-export type BedrockSystemContentBlock = { text: string } | BedrockCachePoint;
+export type ConverseCachePoint = { cachePoint: { type: 'default' } };
+export type ConverseSystemContentBlock = { text: string } | ConverseCachePoint;
 
-export interface BedrockGuardrailConfiguration {
+export interface ConverseGuardrailConfiguration {
   guardrails?: Array<{
     name: string;
     description?: string;
@@ -43,13 +43,13 @@ export interface BedrockGuardrailConfiguration {
   }>;
 }
 
-export type BedrockGuardrailStreamConfiguration = BedrockGuardrailConfiguration;
+export type ConverseGuardrailStreamConfiguration = ConverseGuardrailConfiguration;
 
-export interface BedrockToolInputSchema {
+export interface ConverseToolInputSchema {
   json: Record<string, unknown>;
 }
 
-export interface BedrockTool {
+export interface ConverseTool {
   toolSpec: {
     name: string;
     description?: string;
@@ -57,8 +57,8 @@ export interface BedrockTool {
   };
 }
 
-export interface BedrockToolConfiguration {
-  tools?: Array<BedrockTool | BedrockCachePoint>;
+export interface ConverseToolConfiguration {
+  tools?: Array<ConverseTool | ConverseCachePoint>;
   toolChoice?: { tool: { name: string } } | { auto: {} } | { any: {} } | undefined;
 }
 
@@ -75,14 +75,14 @@ export const BEDROCK_STOP_REASONS = [
   'tool_use'
 ] as const;
 
-export type BedrockStopReason = (typeof BEDROCK_STOP_REASONS)[number];
+export type ConverseStopReason = (typeof BEDROCK_STOP_REASONS)[number];
 
-export type BedrockImageFormat = 'jpeg' | 'png' | 'gif';
-export type BedrockDocumentFormat = 'pdf' | 'txt' | 'md';
+export type ConverseImageFormat = 'jpeg' | 'png' | 'gif';
+export type ConverseDocumentFormat = 'pdf' | 'txt' | 'md';
 
-export interface BedrockDocumentBlock {
+export interface ConverseDocumentBlock {
   document: {
-    format: BedrockDocumentFormat;
+    format: ConverseDocumentFormat;
     name: string;
     source: {
       bytes: string;
@@ -90,27 +90,27 @@ export interface BedrockDocumentBlock {
   };
 }
 
-export interface BedrockGuardrailConverseContentBlock {
+export interface ConverseGuardrailConverseContentBlock {
   guardContent: unknown;
 }
 
-export interface BedrockImageBlock {
+export interface ConverseImageBlock {
   image: {
-    format: BedrockImageFormat;
+    format: ConverseImageFormat;
     source: {
       bytes: string;
     };
   };
 }
 
-export interface BedrockToolResultBlock {
+export interface ConverseToolResultBlock {
   toolResult: {
     toolUseId: string;
-    content: Array<BedrockTextBlock | BedrockImageBlock>;
+    content: Array<ConverseTextBlock | ConverseImageBlock>;
   };
 }
 
-export interface BedrockToolUseBlock {
+export interface ConverseToolUseBlock {
   toolUse: {
     toolUseId: string;
     name: string;
@@ -118,11 +118,11 @@ export interface BedrockToolUseBlock {
   };
 }
 
-export interface BedrockTextBlock {
+export interface ConverseTextBlock {
   text: string;
 }
 
-export interface BedrockReasoningContentBlock {
+export interface ConverseReasoningContentBlock {
   reasoningContent: {
     reasoningText: {
       text: string;
@@ -131,7 +131,7 @@ export interface BedrockReasoningContentBlock {
   };
 }
 
-export interface BedrockRedactedReasoningContentBlock {
+export interface ConverseRedactedReasoningContentBlock {
   reasoningContent: {
     redactedReasoning: {
       data: string;
@@ -139,13 +139,13 @@ export interface BedrockRedactedReasoningContentBlock {
   };
 }
 
-export type BedrockContentBlock =
-  | BedrockDocumentBlock
-  | BedrockGuardrailConverseContentBlock
-  | BedrockImageBlock
-  | BedrockTextBlock
-  | BedrockToolResultBlock
-  | BedrockToolUseBlock
-  | BedrockReasoningContentBlock
-  | BedrockRedactedReasoningContentBlock
-  | BedrockCachePoint;
+export type ConverseContentBlock =
+  | ConverseDocumentBlock
+  | ConverseGuardrailConverseContentBlock
+  | ConverseImageBlock
+  | ConverseTextBlock
+  | ConverseToolResultBlock
+  | ConverseToolUseBlock
+  | ConverseReasoningContentBlock
+  | ConverseRedactedReasoningContentBlock
+  | ConverseCachePoint;

@@ -1,7 +1,7 @@
 import { type LanguageModelV1FinishReason } from '@ai-sdk/provider';
-import { type BedrockStopReason } from './converse-compatible-api-types.js';
+import { type ConverseStopReason } from './converse-compatible-api-types.js';
 
-export function mapConverseCompatibleFinishReason(finishReason?: BedrockStopReason): LanguageModelV1FinishReason {
+export function mapConverseCompatibleFinishReason(finishReason?: ConverseStopReason): LanguageModelV1FinishReason {
   switch (finishReason) {
     case 'stop_sequence':
     case 'end_turn':
