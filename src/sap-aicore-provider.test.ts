@@ -7,9 +7,12 @@ const TEST_PROMPT: LanguageModelV1Prompt = [{ role: 'user', content: [{ type: 't
 const BASE_URL = `https://test-resource.openai.azure.com/openai/deployments/test-deployment`;
 const ACCESS_TOKEN_BASE_URL = 'https://auth.example.com';
 const ACCESS_TOKEN_URL = `${ACCESS_TOKEN_BASE_URL}/oauth/token`;
+const BEDROCK_BASE_URL = 'https://bedrock.example.com';
+const BEDROCK_URL = `${BEDROCK_BASE_URL}/model/${encodeURIComponent('sap-aicore/o3')}/converse`;
 const server = createTestServer({
   [`${BASE_URL}/chat/completions`]: {},
-  [ACCESS_TOKEN_URL]: {}
+  [ACCESS_TOKEN_URL]: {},
+  [BEDROCK_URL]: {}
 });
 function prepareJsonResponse({ content = '' }: { content?: string } = {}) {
   server.urls[`${BASE_URL}/chat/completions`].response = {
@@ -39,6 +42,26 @@ function prepareJsonResponse({ content = '' }: { content?: string } = {}) {
   };
 }
 
+function prepareBedrockResponse() {
+  (server.urls as any)[BEDROCK_URL].response = {
+    type: 'json-value',
+    body: {
+      id: 'bedrock',
+      object: 'chat.completion',
+      created: 0,
+      model: 'bedrock-model',
+      choices: [
+        {
+          index: 0,
+          message: { role: 'assistant', content: 'hi' },
+          finish_reason: 'stop'
+        }
+      ],
+      usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 }
+    }
+  };
+}
+
 function prepareTokenResponse(token: string) {
   server.urls[ACCESS_TOKEN_URL].response = {
     type: 'json-value',
@@ -51,6 +74,7 @@ describe('chat', () => {
     beforeEach(() => {
       prepareTokenResponse('token123');
       prepareJsonResponse();
+      prepareBedrockResponse();
       process.env.ACCESS_TOKEN_BASE_URL = ACCESS_TOKEN_BASE_URL;
       process.env.CLIENT_ID = 'id';
       process.env.CLIENT_SECRET = 'secret';
@@ -176,6 +200,20 @@ describe('chat', () => {
       });
 
       expect(server.calls[1]!.requestHeaders.authorization).toBe('Bearer token123');
+    });
+
+    it('should call bedrock endpoint for bedrock models', async () => {
+      const provider = createSapAiCore({
+        deploymentUrl: BEDROCK_BASE_URL
+      });
+
+      await provider('sap-aicore/o3').doGenerate({
+        inputFormat: 'prompt',
+        mode: { type: 'regular' },
+        prompt: TEST_PROMPT
+      });
+
+      expect(server.calls[1]!.requestUrl).toBe(BEDROCK_URL);
     });
   });
 });
