@@ -3,7 +3,7 @@ import { BedrockChatLanguageModel } from './bedrock-chat-language-model.js';
 import type { BedrockChatConfig } from './bedrock-chat-settings';
 import { generateId } from '@ai-sdk/provider-utils';
 
-export class BedrockConverseChatLanguageModel implements CompatibleChatLanguageModel<BedrockChatConfig> {
+export class AmazonBedrockChatLanguageModel implements CompatibleChatLanguageModel<BedrockChatConfig> {
   constructor(private readonly config: BedrockChatConfig) {}
 
   createChatModel(modelId: string, settings: BedrockChatConfig) {
