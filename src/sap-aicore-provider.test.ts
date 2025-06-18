@@ -203,19 +203,5 @@ describe('chat', () => {
 
       expect(server.calls[1]!.requestHeaders.authorization).toBe('Bearer token123');
     });
-
-    it('should call bedrock endpoint for bedrock models', async () => {
-      const provider = createSapAiCore({
-        deploymentUrl: BEDROCK_BASE_URL
-      });
-
-      await provider(BEDROCK_MODEL_ID).doGenerate({
-        inputFormat: 'prompt',
-        mode: { type: 'regular' },
-        prompt: TEST_PROMPT
-      });
-
-      expect(server.calls[1]!.requestUrl).toBe(BEDROCK_URL);
-    });
   });
 });

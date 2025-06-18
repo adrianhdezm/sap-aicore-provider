@@ -20,14 +20,15 @@ import {
 } from '@ai-sdk/provider-utils';
 import { z } from 'zod';
 import { BEDROCK_STOP_REASONS, type BedrockConverseInput, type BedrockStopReason } from './bedrock-api-types.js';
-import type { BedrockChatModelId, BedrockChatSettings } from './bedrock-chat-settings.js';
 import { BedrockErrorSchema } from './bedrock-error.js';
 import { createBedrockEventStreamResponseHandler } from './bedrock-event-stream-response-handler.js';
 import { prepareTools } from './bedrock-prepare-tools.js';
 import { convertToBedrockChatMessages } from './convert-to-bedrock-chat-messages';
 import { mapBedrockFinishReason } from './map-bedrock-finish-reason';
+import type { BedrockChatSettings, BedrockModelId } from './bedrock-chat-settings.js';
 
 type BedrockChatConfig = {
+  provider: string;
   baseUrl: () => string;
   headers: Resolvable<Record<string, string | undefined>>;
   fetch?: FetchFunction;
@@ -41,7 +42,7 @@ export class BedrockChatLanguageModel implements LanguageModelV1 {
   readonly supportsImageUrls = false;
 
   constructor(
-    readonly modelId: BedrockChatModelId,
+    readonly modelId: BedrockModelId,
     private readonly settings: BedrockChatSettings,
     private readonly config: BedrockChatConfig
   ) {}

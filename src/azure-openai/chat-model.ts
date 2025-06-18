@@ -14,7 +14,7 @@ export const OPENAI_MODEL_IDS = [
   'sap-aicore/o4-mini'
 ] as const;
 
-export type AzureOpenAIModelId = (typeof OPENAI_MODEL_IDS)[number];
+export type AzureOpenAIModelId = (typeof OPENAI_MODEL_IDS)[number] | (string & {});
 
 export interface AzureOpenAICompatibleChatConfig {
   provider: string;
