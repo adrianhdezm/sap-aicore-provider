@@ -1,6 +1,5 @@
 import { OpenAICompatibleChatLanguageModel, type OpenAICompatibleChatSettings } from '@ai-sdk/openai-compatible';
 import type { FetchFunction } from '@ai-sdk/provider-utils';
-import type { CompatibleChatLanguageModel } from '../compatible-chat-language-model';
 
 export const AZURE_OPENAI_MODEL_IDS = [
   'sap-aicore/gpt-4o',
@@ -23,16 +22,16 @@ export interface AzureOpenAIChatConfig {
   fetch?: FetchFunction;
 }
 
-export class AzureOpenAIChatLanguageModel implements CompatibleChatLanguageModel<OpenAICompatibleChatSettings> {
-  constructor(private readonly config: AzureOpenAIChatConfig) {}
-
-  createChatModel(modelId: string, settings: OpenAICompatibleChatSettings = {}) {
-    return new OpenAICompatibleChatLanguageModel(modelId, settings, {
-      provider: this.config.provider,
-      url: this.config.url,
-      headers: this.config.headers,
-      fetch: this.config.fetch,
-      supportsStructuredOutputs: true
-    });
-  }
+export function createAzureOpenAIChatModel(
+  modelId: string,
+  settings: OpenAICompatibleChatSettings,
+  config: AzureOpenAIChatConfig
+) {
+  return new OpenAICompatibleChatLanguageModel(modelId, settings, {
+    provider: config.provider,
+    url: config.url,
+    headers: config.headers,
+    fetch: config.fetch,
+    supportsStructuredOutputs: true
+  });
 }

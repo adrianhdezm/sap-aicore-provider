@@ -1,8 +1,8 @@
 import type { LanguageModelV1 } from '@ai-sdk/provider';
-import { AzureOpenAIChatLanguageModel, type AzureOpenAIChatConfig, AZURE_OPENAI_MODEL_IDS } from './azure-openai/chat-model';
-import { AmazonBedrockChatLanguageModel } from './amazon-bedrock/chat-model';
+import { createAzureOpenAIChatModel, type AzureOpenAIChatConfig, AZURE_OPENAI_MODEL_IDS } from './azure-openai/chat-model';
+import { BedrockCompatibleChatLanguageModel } from './amazon-bedrock/bedrock-compatible-chat-language-model';
 import type { OpenAICompatibleChatSettings } from '@ai-sdk/openai-compatible';
-import { type FetchFunction, loadSetting } from '@ai-sdk/provider-utils';
+import { type FetchFunction, loadSetting, generateId } from '@ai-sdk/provider-utils';
 import { createFetchWithToken, type TokenProviderConfig } from './lib/fetch-with-token-provider';
 import { BEDROCK_CHAT_MODEL_IDS, type BedrockChatConfig } from './amazon-bedrock/bedrock-chat-settings';
 
@@ -64,14 +64,22 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
     fetch
   };
 
-  const azureStrategy = new AzureOpenAIChatLanguageModel(azureConfig);
-  const bedrockStrategy = new AmazonBedrockChatLanguageModel(bedrockConfig);
 
-  const createChatModel = (modelId: SapAiCoreModelId, settings: OpenAICompatibleChatSettings | BedrockChatConfig = {}): LanguageModelV1 => {
+  const createChatModel = (
+    modelId: SapAiCoreModelId,
+    settings: OpenAICompatibleChatSettings | BedrockChatConfig = {}
+  ): LanguageModelV1 => {
     if ((AZURE_OPENAI_MODEL_IDS as readonly string[]).includes(modelId)) {
-      return azureStrategy.createChatModel(modelId, settings as OpenAICompatibleChatSettings);
+      return createAzureOpenAIChatModel(
+        modelId,
+        settings as OpenAICompatibleChatSettings,
+        azureConfig
+      );
     } else if ((BEDROCK_CHAT_MODEL_IDS as readonly string[]).includes(modelId)) {
-      return bedrockStrategy.createChatModel(modelId, settings as BedrockChatConfig);
+      return new BedrockCompatibleChatLanguageModel(modelId, settings as BedrockChatConfig, {
+        ...bedrockConfig,
+        generateId
+      });
     }
     throw new Error(
       `Unsupported model ID: ${modelId}. Supported models are: ${[...AZURE_OPENAI_MODEL_IDS, ...BEDROCK_CHAT_MODEL_IDS].join(', ')}`

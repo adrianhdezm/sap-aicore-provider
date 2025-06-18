@@ -35,7 +35,7 @@ type BedrockInternalChatConfig = {
   generateId: () => string;
 };
 
-export class BedrockChatLanguageModel implements LanguageModelV1 {
+export class BedrockCompatibleChatLanguageModel implements LanguageModelV1 {
   readonly specificationVersion = 'v1';
   readonly provider = 'amazon-bedrock';
   readonly defaultObjectGenerationMode = 'tool';

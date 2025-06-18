@@ -1,6 +1,6 @@
 import type { LanguageModelV1Prompt } from '@ai-sdk/provider';
 import { createTestServer, convertReadableStreamToArray } from '@ai-sdk/provider-utils/test';
-import { BedrockChatLanguageModel } from './bedrock-chat-language-model';
+import { BedrockCompatibleChatLanguageModel } from './bedrock-compatible-chat-language-model';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { injectFetchHeaders } from '../lib/inject-fetch-headers.js';
 import type { BedrockReasoningContentBlock, BedrockRedactedReasoningContentBlock } from './bedrock-api-types';
@@ -61,7 +61,7 @@ beforeEach(() => {
   };
 });
 
-const model = new BedrockChatLanguageModel(
+const model = new BedrockCompatibleChatLanguageModel(
   modelId,
   {},
   {
@@ -766,7 +766,7 @@ describe('doStream', () => {
       'shared-header': 'options-shared'
     };
 
-    const model = new BedrockChatLanguageModel(
+    const model = new BedrockCompatibleChatLanguageModel(
       modelId,
       {},
       {
@@ -803,7 +803,7 @@ describe('doStream', () => {
 
   it('should work with partial headers', async () => {
     setupMockEventStreamHandler();
-    const model = new BedrockChatLanguageModel(
+    const model = new BedrockCompatibleChatLanguageModel(
       modelId,
       {},
       {
@@ -1397,7 +1397,7 @@ describe('doGenerate', () => {
       'shared-header': 'options-shared'
     };
 
-    const model = new BedrockChatLanguageModel(
+    const model = new BedrockCompatibleChatLanguageModel(
       modelId,
       {},
       {
@@ -1435,7 +1435,7 @@ describe('doGenerate', () => {
   it('should work with partial headers', async () => {
     prepareJsonResponse({});
 
-    const model = new BedrockChatLanguageModel(
+    const model = new BedrockCompatibleChatLanguageModel(
       modelId,
       {},
       {
