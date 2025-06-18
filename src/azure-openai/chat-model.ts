@@ -2,7 +2,7 @@ import { OpenAICompatibleChatLanguageModel, type OpenAICompatibleChatSettings } 
 import type { FetchFunction } from '@ai-sdk/provider-utils';
 import type { CompatibleChatLanguageModel } from '../compatible-chat-language-model';
 
-export const OPENAI_MODEL_IDS = [
+export const AZURE_OPENAI_MODEL_IDS = [
   'sap-aicore/gpt-4o',
   'sap-aicore/gpt-4o-mini',
   'sap-aicore/gpt-4.1',
@@ -14,17 +14,17 @@ export const OPENAI_MODEL_IDS = [
   'sap-aicore/o4-mini'
 ] as const;
 
-export type AzureOpenAIModelId = (typeof OPENAI_MODEL_IDS)[number] | (string & {});
+export type AzureOpenAIChatModelId = (typeof AZURE_OPENAI_MODEL_IDS)[number] | (string & {});
 
-export interface AzureOpenAICompatibleChatConfig {
+export interface AzureOpenAIChatConfig {
   provider: string;
   url: ({ path }: { path: string }) => string;
   headers: () => Record<string, string>;
   fetch?: FetchFunction;
 }
 
-export class AzureOpenAICompatibleChatLanguageModel implements CompatibleChatLanguageModel {
-  constructor(private readonly config: AzureOpenAICompatibleChatConfig) {}
+export class AzureOpenAIChatLanguageModel implements CompatibleChatLanguageModel<OpenAICompatibleChatSettings> {
+  constructor(private readonly config: AzureOpenAIChatConfig) {}
 
   createChatModel(modelId: string, settings: OpenAICompatibleChatSettings = {}) {
     return new OpenAICompatibleChatLanguageModel(modelId, settings, {

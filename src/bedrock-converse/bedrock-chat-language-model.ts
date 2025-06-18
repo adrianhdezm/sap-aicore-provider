@@ -25,9 +25,9 @@ import { createBedrockEventStreamResponseHandler } from './bedrock-event-stream-
 import { prepareTools } from './bedrock-prepare-tools.js';
 import { convertToBedrockChatMessages } from './convert-to-bedrock-chat-messages';
 import { mapBedrockFinishReason } from './map-bedrock-finish-reason';
-import type { BedrockChatSettings, BedrockModelId } from './bedrock-chat-settings.js';
+import type { BedrockChatConfig, BedrockChatModelId } from './bedrock-chat-settings.js';
 
-type BedrockChatConfig = {
+type BedrockInternalChatConfig = {
   provider: string;
   baseUrl: () => string;
   headers: Resolvable<Record<string, string | undefined>>;
@@ -42,9 +42,9 @@ export class BedrockChatLanguageModel implements LanguageModelV1 {
   readonly supportsImageUrls = false;
 
   constructor(
-    readonly modelId: BedrockModelId,
-    private readonly settings: BedrockChatSettings,
-    private readonly config: BedrockChatConfig
+    readonly modelId: BedrockChatModelId,
+    private readonly settings: Partial<BedrockChatConfig>,
+    private readonly config: BedrockInternalChatConfig
   ) {}
 
   private getArgs({
