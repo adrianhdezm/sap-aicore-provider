@@ -4,6 +4,7 @@ import {
   type LanguageModelV1,
   type LanguageModelV1CallWarning,
   type LanguageModelV1FinishReason,
+  type LanguageModelV1FunctionToolCall,
   type LanguageModelV1ProviderMetadata,
   type LanguageModelV1StreamPart,
   UnsupportedFunctionalityError
@@ -288,16 +289,18 @@ export class ConverseCompatibleChatLanguageModel implements LanguageModelV1 {
       // Filter out any undefined values
       .filter((item): item is NonNullable<typeof item> => item !== undefined);
 
+    const toolCalls: LanguageModelV1FunctionToolCall[] = response.output?.message?.content
+      ?.filter((part) => !!part.toolUse)
+      ?.map((part) => ({
+        toolCallType: 'function',
+        toolCallId: part.toolUse?.toolUseId ?? this.config.generateId(),
+        toolName: part.toolUse?.name ?? `tool-${this.config.generateId()}`,
+        args: JSON.stringify(part.toolUse?.input ?? '')
+      }));
+
     return {
       text: response.output?.message?.content?.map((part) => part.text ?? '').join('') ?? undefined,
-      toolCalls: response.output?.message?.content
-        ?.filter((part) => !!part.toolUse)
-        ?.map((part) => ({
-          toolCallType: 'function',
-          toolCallId: part.toolUse?.toolUseId ?? this.config.generateId(),
-          toolName: part.toolUse?.name ?? `tool-${this.config.generateId()}`,
-          args: JSON.stringify(part.toolUse?.input ?? '')
-        })),
+      toolCalls: toolCalls.length > 0 ? toolCalls : undefined, // Tool calls should be undefined if the model did not generate any tool calls.
       finishReason: mapConverseCompatibleFinishReason(response.stopReason as ConverseStopReason),
       usage: {
         promptTokens: response.usage?.inputTokens ?? Number.NaN,
