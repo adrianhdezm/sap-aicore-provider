@@ -63,10 +63,10 @@ const sapAiCore = createSapAiCore({
 
 You can also provide configuration values using environment variables:
 
-- `SAP_AICORE_DEPLOYMENT_URL`
-- `ACCESS_TOKEN_BASE_URL`
-- `CLIENT_ID`
-- `CLIENT_SECRET`
+- `AICORE_DEPLOYMENT_URL`
+- `AICORE_AUTH_URL`
+- `AICORE_CLIENT_ID`
+- `AICORE_CLIENT_SECRET`
 
 Tokens are cached for one hour by default to reduce token provider requests.
 

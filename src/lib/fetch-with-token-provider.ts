@@ -17,20 +17,20 @@ export function createFetchWithToken(config?: TokenProviderConfig, baseFetch: Fe
   return async (input, init = {}) => {
     const accessTokenBaseUrl = loadSetting({
       settingValue: config?.accessTokenBaseUrl,
-      environmentVariableName: 'ACCESS_TOKEN_BASE_URL',
+      environmentVariableName: 'AICORE_AUTH_URL',
       settingName: 'accessTokenBaseUrl',
       description: 'SAP AI Core Access Token Base URL'
     });
     const clientId = loadSetting({
       settingValue: config?.clientId,
-      environmentVariableName: 'CLIENT_ID',
+      environmentVariableName: 'AICORE_CLIENT_ID',
       settingName: 'clientId',
       description: 'SAP AI Core Client ID'
     });
 
     const clientSecret = loadSetting({
       settingValue: config?.clientSecret,
-      environmentVariableName: 'CLIENT_SECRET',
+      environmentVariableName: 'AICORE_CLIENT_SECRET',
       settingName: 'clientSecret',
       description: 'SAP AI Core Client Secret'
     });

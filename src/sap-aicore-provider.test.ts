@@ -51,15 +51,15 @@ describe('chat', () => {
     beforeEach(() => {
       prepareTokenResponse('token123');
       prepareJsonResponse();
-      process.env.ACCESS_TOKEN_BASE_URL = ACCESS_TOKEN_BASE_URL;
-      process.env.CLIENT_ID = 'id';
-      process.env.CLIENT_SECRET = 'secret';
+      process.env.AICORE_AUTH_URL = ACCESS_TOKEN_BASE_URL;
+      process.env.AICORE_CLIENT_ID = 'id';
+      process.env.AICORE_CLIENT_SECRET = 'secret';
     });
 
     afterEach(() => {
-      delete process.env.ACCESS_TOKEN_BASE_URL;
-      delete process.env.CLIENT_ID;
-      delete process.env.CLIENT_SECRET;
+      delete process.env.AICORE_AUTH_URL;
+      delete process.env.AICORE_CLIENT_ID;
+      delete process.env.AICORE_CLIENT_SECRET;
     });
 
     it('should set the correct default api version', async () => {
@@ -161,9 +161,9 @@ describe('chat', () => {
     });
 
     it('should load token provider config from environment variables', async () => {
-      process.env.ACCESS_TOKEN_BASE_URL = ACCESS_TOKEN_BASE_URL;
-      process.env.CLIENT_ID = 'id';
-      process.env.CLIENT_SECRET = 'secret';
+      process.env.AICORE_AUTH_URL = ACCESS_TOKEN_BASE_URL;
+      process.env.AICORE_CLIENT_ID = 'id';
+      process.env.AICORE_CLIENT_SECRET = 'secret';
 
       const provider = createSapAiCore({
         deploymentUrl: BASE_URL
