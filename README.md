@@ -63,7 +63,7 @@ const sapAiCore = createSapAiCore({
 
 You can also provide configuration values using environment variables:
 
-- `SAP_AICORE_DEPLOYMENT_URL`
+- `AICORE_DEPLOYMENT_URL`
 - `AICORE_AUTH_URL`
 - `AICORE_CLIENT_ID`
 - `AICORE_CLIENT_SECRET`

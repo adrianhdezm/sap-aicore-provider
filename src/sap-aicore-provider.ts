@@ -50,7 +50,7 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
   const url = ({ modelId, path }: { path: string; modelId: SapAiCoreModelId }) => {
     const deploymentUrl = loadSetting({
       settingValue: options.deploymentUrl,
-      environmentVariableName: 'SAP_AICORE_DEPLOYMENT_URL',
+      environmentVariableName: 'AICORE_DEPLOYMENT_URL',
       settingName: 'deploymentUrl',
       description: 'SAP AI Core Deployment URL'
     });
