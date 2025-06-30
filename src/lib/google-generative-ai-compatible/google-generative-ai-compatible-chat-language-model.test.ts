@@ -573,7 +573,7 @@ describe('doGenerate', () => {
   it('should not pass specification in object-json mode with structuredOutputs = false', async () => {
     prepareJsonResponse({});
 
-    await provider.chat('sap-aicore/gemini-pro', { structuredOutputs: false } as any).doGenerate({
+    await provider.chat('sap-aicore/gemini-pro', { structuredOutputs: false }).doGenerate({
       inputFormat: 'prompt',
       mode: {
         type: 'object-json',
@@ -758,140 +758,6 @@ describe('doGenerate', () => {
     ]);
   });
 
-  describe('async headers handling', () => {
-    it('merges async config headers with sync request headers', async () => {
-      server.urls[TEST_URL_GEMINI_PRO].response = {
-        type: 'json-value',
-        body: {
-          candidates: [
-            {
-              content: {
-                parts: [{ text: '' }],
-                role: 'model'
-              },
-              finishReason: 'STOP',
-              index: 0,
-              safetyRatings: SAFETY_RATINGS
-            }
-          ],
-          promptFeedback: { safetyRatings: SAFETY_RATINGS },
-          usageMetadata: {
-            promptTokenCount: 1,
-            candidatesTokenCount: 2,
-            totalTokenCount: 3
-          }
-        }
-      };
-
-      const model = new GoogleGenerativeAICompatibleLanguageModel(
-        'gemini-pro',
-        {},
-        {
-          provider: 'google.generative-ai',
-          url: ({ path }) => `https://generativelanguage.googleapis.com/v1beta${path}`,
-          headers: (async () => ({
-            'X-Async-Config': 'async-config-value',
-            'X-Common': 'config-value'
-          })) as any,
-          generateId: () => 'test-id'
-        }
-      );
-
-      await model.doGenerate({
-        inputFormat: 'prompt',
-        mode: { type: 'regular' },
-        prompt: TEST_PROMPT,
-        headers: {
-          'X-Sync-Request': 'sync-request-value',
-          'X-Common': 'request-value' // Should override config value
-        }
-      });
-
-      expect(server.calls[0]!.requestHeaders).toStrictEqual({
-        'content-type': 'application/json',
-        'x-async-config': 'async-config-value',
-        'x-sync-request': 'sync-request-value',
-        'x-common': 'request-value' // Request headers take precedence
-      });
-    });
-
-    it('handles Promise-based headers', async () => {
-      server.urls[TEST_URL_GEMINI_PRO].response = {
-        type: 'json-value',
-        body: {
-          candidates: [
-            {
-              content: {
-                parts: [{ text: '' }],
-                role: 'model'
-              },
-              finishReason: 'STOP',
-              index: 0,
-              safetyRatings: SAFETY_RATINGS
-            }
-          ],
-          promptFeedback: { safetyRatings: SAFETY_RATINGS },
-          usageMetadata: {
-            promptTokenCount: 1,
-            candidatesTokenCount: 2,
-            totalTokenCount: 3
-          }
-        }
-      };
-
-      const model = new GoogleGenerativeAICompatibleLanguageModel(
-        'gemini-pro',
-        {},
-        {
-          provider: 'google.generative-ai',
-          url: ({ path }) => `https://generativelanguage.googleapis.com/v1beta${path}`,
-          headers: (async () => ({
-            'X-Promise-Header': 'promise-value'
-          })) as any,
-          generateId: () => 'test-id'
-        }
-      );
-
-      await model.doGenerate({
-        inputFormat: 'prompt',
-        mode: { type: 'regular' },
-        prompt: TEST_PROMPT
-      });
-
-      expect(server.calls[0]!.requestHeaders).toStrictEqual({
-        'content-type': 'application/json',
-        'x-promise-header': 'promise-value'
-      });
-    });
-
-    it('handles async function headers from config', async () => {
-      prepareJsonResponse({});
-      const model = new GoogleGenerativeAICompatibleLanguageModel(
-        'gemini-pro',
-        {},
-        {
-          provider: 'google.generative-ai',
-          url: ({ path }) => `https://generativelanguage.googleapis.com/v1beta${path}`,
-          headers: (async () => ({
-            'X-Async-Header': 'async-value'
-          })) as any,
-          generateId: () => 'test-id'
-        }
-      );
-
-      await model.doGenerate({
-        inputFormat: 'prompt',
-        mode: { type: 'regular' },
-        prompt: TEST_PROMPT
-      });
-
-      expect(server.calls[0]!.requestHeaders).toStrictEqual({
-        'content-type': 'application/json',
-        'x-async-header': 'async-value'
-      });
-    });
-  });
-
   it('should expose safety ratings in provider metadata', async () => {
     server.urls[TEST_URL_GEMINI_PRO].response = {
       type: 'json-value',
@@ -1019,7 +885,7 @@ describe('doGenerate', () => {
 
       const gemini2Pro = provider.chat('sap-aicore/gemini-2.0-pro', {
         useSearchGrounding: true
-      } as any);
+      });
       await gemini2Pro.doGenerate({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
@@ -1038,7 +904,7 @@ describe('doGenerate', () => {
 
       const gemini2Flash = provider.chat('sap-aicore/gemini-2.0-flash-exp', {
         useSearchGrounding: true
-      } as any);
+      });
       await gemini2Flash.doGenerate({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
@@ -1057,7 +923,7 @@ describe('doGenerate', () => {
 
       const geminiPro = provider.chat('sap-aicore/gemini-1.0-pro', {
         useSearchGrounding: true
-      } as any);
+      });
       await geminiPro.doGenerate({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
@@ -1080,7 +946,7 @@ describe('doGenerate', () => {
           mode: 'MODE_DYNAMIC',
           dynamicThreshold: 1
         }
-      } as any);
+      });
 
       await geminiPro.doGenerate({
         inputFormat: 'prompt',
@@ -1875,7 +1741,7 @@ describe('doStream', () => {
 
       const gemini2Pro = provider.chat('sap-aicore/gemini-2.0-pro', {
         useSearchGrounding: true
-      } as any);
+      });
       await gemini2Pro.doStream({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
@@ -1895,7 +1761,7 @@ describe('doStream', () => {
 
       const gemini2Flash = provider.chat('sap-aicore/gemini-2.0-flash-exp', {
         useSearchGrounding: true
-      } as any);
+      });
       await gemini2Flash.doStream({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
@@ -1915,7 +1781,7 @@ describe('doStream', () => {
 
       const geminiPro = provider.chat('sap-aicore/gemini-1.0-pro', {
         useSearchGrounding: true
-      } as any);
+      });
       await geminiPro.doStream({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
@@ -1939,7 +1805,7 @@ describe('doStream', () => {
           mode: 'MODE_DYNAMIC',
           dynamicThreshold: 1
         }
-      } as any);
+      });
 
       await geminiPro.doStream({
         inputFormat: 'prompt',

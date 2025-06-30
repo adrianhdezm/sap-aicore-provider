@@ -33,7 +33,7 @@ export type SapAiCoreModelId =
 
 export const AZURE_OPENAI_API_VERSION = '2025-04-01-preview';
 
-export type SapAiCoreChatSettings = OpenAICompatibleChatSettings | ConverseCompatibleChatSettings;
+export type SapAiCoreChatSettings = OpenAICompatibleChatSettings | ConverseCompatibleChatSettings | GoogleGenerativeAICompatibleSettings;
 
 export interface SapAiCoreProvider {
   (modelId: SapAiCoreModelId, settings?: SapAiCoreChatSettings): LanguageModelV1;
