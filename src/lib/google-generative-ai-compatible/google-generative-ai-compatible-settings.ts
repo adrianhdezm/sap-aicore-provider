@@ -102,5 +102,3 @@ Optional. Specifies the dynamic retrieval configuration.
    */
   dynamicRetrievalConfig?: DynamicRetrievalConfig;
 }
-
-export interface InternalGoogleGenerativeAICompatibleSettings extends GoogleGenerativeAICompatibleSettings {}

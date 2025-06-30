@@ -22,7 +22,7 @@ import { googleFailedResponseHandler } from './google-error.js';
 import { type GoogleGenerativeAICompatibleContentPart } from './google-generative-ai-compatible-prompt.js';
 import {
   type GoogleGenerativeAICompatibleModelId,
-  type InternalGoogleGenerativeAICompatibleSettings
+  type GoogleGenerativeAICompatibleSettings
 } from './google-generative-ai-compatible-settings.js';
 import { prepareTools } from './google-prepare-tools.js';
 import { mapGoogleGenerativeAICompatibleFinishReason } from './map-google-generative-ai-finish-reason.js';
@@ -45,13 +45,13 @@ export class GoogleGenerativeAICompatibleLanguageModel implements LanguageModelV
   }
 
   readonly modelId: GoogleGenerativeAICompatibleModelId;
-  readonly settings: InternalGoogleGenerativeAICompatibleSettings;
+  readonly settings: GoogleGenerativeAICompatibleSettings;
 
   private readonly config: GoogleGenerativeAICompatibleConfig;
 
   constructor(
     modelId: GoogleGenerativeAICompatibleModelId,
-    settings: InternalGoogleGenerativeAICompatibleSettings,
+    settings: GoogleGenerativeAICompatibleSettings,
     config: GoogleGenerativeAICompatibleConfig
   ) {
     this.modelId = modelId;

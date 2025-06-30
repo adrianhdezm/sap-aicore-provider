@@ -4,6 +4,8 @@ import { type FetchFunction, generateId, loadSetting } from '@ai-sdk/provider-ut
 import { createFetchWithToken, type TokenProviderConfig } from './lib/fetch-with-token-provider.js';
 import type { ConverseCompatibleChatSettings } from './lib/converse-compatible/converse-compatible-chat-settings.js';
 import { ConverseCompatibleChatLanguageModel } from './lib/converse-compatible/converse-compatible-chat-language-model.js';
+import { GoogleGenerativeAICompatibleLanguageModel } from './lib/google-generative-ai-compatible/google-generative-ai-compatible-chat-language-model.js';
+import type { GoogleGenerativeAICompatibleSettings } from './lib/google-generative-ai-compatible/google-generative-ai-compatible-settings.js';
 
 export type SapAiCoreModelId =
   | 'sap-aicore/gpt-4o'
@@ -21,6 +23,12 @@ export type SapAiCoreModelId =
   | 'sap-aicore/anthropic--claude-4-sonnet'
   | 'sap-aicore/anthropic--claude-3.5-sonnet'
   | 'sap-aicore/anthropic--claude-3.7-sonnet'
+  | 'sap-aicore/gemini-1.5-pro'
+  | 'sap-aicore/gemini-1.5-flash'
+  | 'sap-aicore/gemini-2.0-flash'
+  | 'sap-aicore/gemini-2.0-flash-lite'
+  | 'sap-aicore/gemini-2.5-pro'
+  | 'sap-aicore/gemini-2.5-flash'
   | (string & {});
 
 export const AZURE_OPENAI_API_VERSION = '2025-04-01-preview';
@@ -58,6 +66,8 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
     if (modelId.startsWith('sap-aicore/anthropic')) {
       // For Anthropic models, we return the URL without the API version
       return url.toString();
+    } else if (modelId.startsWith('sap-aicore/gemini')) {
+      return url.toString();
     } else {
       // For openai models, we append the API version
       url.searchParams.set('api-version', AZURE_OPENAI_API_VERSION);
@@ -77,6 +87,16 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
       // For Anthropic models, we use the Converse-compatible chat model
       const chatModelSettings = settings as ConverseCompatibleChatSettings;
       return new ConverseCompatibleChatLanguageModel(modelId, chatModelSettings, {
+        provider: 'sap-aicore.chat',
+        url,
+        headers: getHeaders,
+        fetch,
+        generateId
+      });
+    } else if (modelId.startsWith('sap-aicore/gemini')) {
+      // For Gemini models, we use the Google Generative AI compatible chat model
+      const googleGenerativeAISettings = settings as GoogleGenerativeAICompatibleSettings;
+      return new GoogleGenerativeAICompatibleLanguageModel(modelId, googleGenerativeAISettings, {
         provider: 'sap-aicore.chat',
         url,
         headers: getHeaders,
