@@ -4,6 +4,7 @@ import {
   GoogleGenerativeAICompatibleLanguageModel,
   groundingMetadataSchema
 } from './google-generative-ai-compatible-chat-language-model.js';
+import { createSapAiCore } from '../../sap-aicore-provider.js';
 import { type GoogleGenerativeAICompatibleGroundingMetadata } from './google-generative-ai-compatible-prompt.js';
 import { describe, expect, it } from 'vitest';
 
@@ -27,12 +28,6 @@ const SAFETY_RATINGS = [
     probability: 'NEGLIGIBLE'
   }
 ];
-
-const provider = createGoogleGenerativeAI({
-  apiKey: 'test-api-key',
-  generateId: () => 'test-id'
-});
-const model = provider.chat('gemini-pro');
 
 describe('groundingMetadataSchema', () => {
   it('validates complete grounding metadata with web search results', () => {
@@ -149,13 +144,40 @@ describe('doGenerate', () => {
   const TEST_URL_GEMINI_1_0_PRO = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent';
 
   const TEST_URL_GEMINI_1_5_FLASH = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+  const ACCESS_TOKEN_BASE_URL = 'https://auth.example.com';
+  const ACCESS_TOKEN_URL = `${ACCESS_TOKEN_BASE_URL}/oauth/token`;
 
   const server = createTestServer({
     [TEST_URL_GEMINI_PRO]: {},
     [TEST_URL_GEMINI_2_0_PRO]: {},
     [TEST_URL_GEMINI_2_0_FLASH_EXP]: {},
     [TEST_URL_GEMINI_1_0_PRO]: {},
-    [TEST_URL_GEMINI_1_5_FLASH]: {}
+    [TEST_URL_GEMINI_1_5_FLASH]: {},
+    [ACCESS_TOKEN_URL]: {}
+  });
+
+  const prepareTokenResponse = (token: string) => {
+    server.urls[ACCESS_TOKEN_URL].response = {
+      type: 'json-value',
+      body: { access_token: token }
+    };
+  };
+
+  let provider: any;
+  let model: any;
+
+  beforeEach(() => {
+    prepareTokenResponse('token123');
+    provider = createSapAiCore({
+      deploymentUrl: 'https://generativelanguage.googleapis.com/v1beta',
+      tokenProvider: {
+        accessTokenBaseUrl: ACCESS_TOKEN_BASE_URL,
+        clientId: 'id',
+        clientSecret: 'secret'
+      },
+      fetch: server.fetch
+    });
+    model = provider.chat('sap-aicore/gemini-pro');
   });
 
   const prepareJsonResponse = ({
@@ -322,7 +344,7 @@ describe('doGenerate', () => {
 
     expect(toolCalls).toStrictEqual([
       {
-        toolCallId: 'test-id',
+        toolCallId: expect.any(String),
         toolCallType: 'function',
         toolName: 'test-tool',
         args: '{"value":"example value"}'
@@ -505,7 +527,7 @@ describe('doGenerate', () => {
   it('should pass specification in object-json mode with structuredOutputs = true (default)', async () => {
     prepareJsonResponse({});
 
-    await provider.languageModel('gemini-pro').doGenerate({
+    await provider.chat('sap-aicore/gemini-pro').doGenerate({
       inputFormat: 'prompt',
       mode: {
         type: 'object-json',
@@ -541,7 +563,7 @@ describe('doGenerate', () => {
   it('should not pass specification in object-json mode with structuredOutputs = false', async () => {
     prepareJsonResponse({});
 
-    await provider.languageModel('gemini-pro', { structuredOutputs: false }).doGenerate({
+    await provider.chat('sap-aicore/gemini-pro', { structuredOutputs: false } as any).doGenerate({
       inputFormat: 'prompt',
       mode: {
         type: 'object-json',
@@ -569,7 +591,7 @@ describe('doGenerate', () => {
   it('should pass tool specification in object-tool mode', async () => {
     prepareJsonResponse({});
 
-    await provider.languageModel('gemini-pro').doGenerate({
+    await provider.chat('sap-aicore/gemini-pro').doGenerate({
       inputFormat: 'prompt',
       mode: {
         type: 'object-tool',
@@ -616,14 +638,14 @@ describe('doGenerate', () => {
   it('should pass headers', async () => {
     prepareJsonResponse({});
 
-    const provider = createGoogleGenerativeAI({
-      apiKey: 'test-api-key',
+    const provider = createSapAiCore({
+      deploymentUrl: 'https://generativelanguage.googleapis.com/v1beta',
       headers: {
         'Custom-Provider-Header': 'provider-header-value'
       }
     });
 
-    await provider.chat('gemini-pro').doGenerate({
+    await provider.chat('sap-aicore/gemini-pro').doGenerate({
       inputFormat: 'prompt',
       mode: { type: 'regular' },
       prompt: TEST_PROMPT,
@@ -635,10 +657,10 @@ describe('doGenerate', () => {
     const requestHeaders = server.calls[0]!.requestHeaders;
 
     expect(requestHeaders).toStrictEqual({
+      'ai-resource-group': 'default',
       'content-type': 'application/json',
       'custom-provider-header': 'provider-header-value',
-      'custom-request-header': 'request-header-value',
-      'x-goog-api-key': 'test-api-key'
+      'custom-request-header': 'request-header-value'
     });
   });
 
@@ -718,7 +740,7 @@ describe('doGenerate', () => {
 
     expect(sources).toEqual([
       {
-        id: 'test-id',
+        id: expect.any(String),
         sourceType: 'url',
         title: 'Source Title',
         url: 'https://source.example.com'
@@ -756,13 +778,12 @@ describe('doGenerate', () => {
         {},
         {
           provider: 'google.generative-ai',
-          baseURL: 'https://generativelanguage.googleapis.com/v1beta',
-          headers: async () => ({
+          url: ({ path }) => `https://generativelanguage.googleapis.com/v1beta${path}`,
+          headers: (async () => ({
             'X-Async-Config': 'async-config-value',
             'X-Common': 'config-value'
-          }),
-          generateId: () => 'test-id',
-          isSupportedUrl: () => true
+          })) as any,
+          generateId: () => 'test-id'
         }
       );
 
@@ -813,12 +834,11 @@ describe('doGenerate', () => {
         {},
         {
           provider: 'google.generative-ai',
-          baseURL: 'https://generativelanguage.googleapis.com/v1beta',
-          headers: async () => ({
+          url: ({ path }) => `https://generativelanguage.googleapis.com/v1beta${path}`,
+          headers: (async () => ({
             'X-Promise-Header': 'promise-value'
-          }),
-          generateId: () => 'test-id',
-          isSupportedUrl: () => true
+          })) as any,
+          generateId: () => 'test-id'
         }
       );
 
@@ -841,12 +861,11 @@ describe('doGenerate', () => {
         {},
         {
           provider: 'google.generative-ai',
-          baseURL: 'https://generativelanguage.googleapis.com/v1beta',
-          headers: async () => ({
+          url: ({ path }) => `https://generativelanguage.googleapis.com/v1beta${path}`,
+          headers: (async () => ({
             'X-Async-Header': 'async-value'
-          }),
-          generateId: () => 'test-id',
-          isSupportedUrl: () => true
+          })) as any,
+          generateId: () => 'test-id'
         }
       );
 
@@ -897,7 +916,7 @@ describe('doGenerate', () => {
       prompt: TEST_PROMPT
     });
 
-    expect(providerMetadata?.google.safetyRatings).toStrictEqual([
+    expect(providerMetadata?.google?.safetyRatings).toStrictEqual([
       {
         category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
         probability: 'NEGLIGIBLE',
@@ -948,7 +967,7 @@ describe('doGenerate', () => {
       prompt: TEST_PROMPT
     });
 
-    expect(providerMetadata?.google.groundingMetadata).toStrictEqual({
+    expect(providerMetadata?.google?.groundingMetadata).toStrictEqual({
       webSearchQueries: ["What's the weather in Chicago this weekend?"],
       searchEntryPoint: {
         renderedContent: 'Sample rendered content for search results'
@@ -979,9 +998,8 @@ describe('doGenerate', () => {
   });
 
   describe('search tool selection', () => {
-    const provider = createGoogleGenerativeAI({
-      apiKey: 'test-api-key',
-      generateId: () => 'test-id'
+    const provider = createSapAiCore({
+      deploymentUrl: 'https://generativelanguage.googleapis.com/v1beta'
     });
 
     it('should use googleSearch for gemini-2.0-pro', async () => {
@@ -989,9 +1007,9 @@ describe('doGenerate', () => {
         url: TEST_URL_GEMINI_2_0_PRO
       });
 
-      const gemini2Pro = provider.languageModel('gemini-2.0-pro', {
+      const gemini2Pro = provider.chat('sap-aicore/gemini-2.0-pro', {
         useSearchGrounding: true
-      });
+      } as any);
       await gemini2Pro.doGenerate({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
@@ -1008,9 +1026,9 @@ describe('doGenerate', () => {
         url: TEST_URL_GEMINI_2_0_FLASH_EXP
       });
 
-      const gemini2Flash = provider.languageModel('gemini-2.0-flash-exp', {
+      const gemini2Flash = provider.chat('sap-aicore/gemini-2.0-flash-exp', {
         useSearchGrounding: true
-      });
+      } as any);
       await gemini2Flash.doGenerate({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
@@ -1027,9 +1045,9 @@ describe('doGenerate', () => {
         url: TEST_URL_GEMINI_1_0_PRO
       });
 
-      const geminiPro = provider.languageModel('gemini-1.0-pro', {
+      const geminiPro = provider.chat('sap-aicore/gemini-1.0-pro', {
         useSearchGrounding: true
-      });
+      } as any);
       await geminiPro.doGenerate({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
@@ -1046,13 +1064,13 @@ describe('doGenerate', () => {
         url: TEST_URL_GEMINI_1_5_FLASH
       });
 
-      const geminiPro = provider.languageModel('gemini-1.5-flash', {
+      const geminiPro = provider.chat('sap-aicore/gemini-1.5-flash', {
         useSearchGrounding: true,
         dynamicRetrievalConfig: {
           mode: 'MODE_DYNAMIC',
           dynamicThreshold: 1
         }
-      });
+      } as any);
 
       await geminiPro.doGenerate({
         inputFormat: 'prompt',
@@ -1309,10 +1327,9 @@ describe('doGenerate', () => {
         {},
         {
           provider: 'google.generative-ai.chat', // Simulate non-Vertex provider
-          baseURL: 'https://generativelanguage.googleapis.com/v1beta',
-          headers: {},
-          generateId: () => 'test-id',
-          isSupportedUrl: () => false // Dummy implementation
+          url: ({ path }) => `https://generativelanguage.googleapis.com/v1beta${path}`,
+          headers: () => ({}),
+          generateId: () => 'test-id'
         }
       );
 
@@ -1347,10 +1364,9 @@ describe('doGenerate', () => {
         {},
         {
           provider: 'google.vertex.chat', // Simulate Vertex provider
-          baseURL: 'https://generativelanguage.googleapis.com/v1beta',
-          headers: {},
-          generateId: () => 'test-id',
-          isSupportedUrl: () => false
+          url: ({ path }) => `https://generativelanguage.googleapis.com/v1beta${path}`,
+          headers: () => ({}),
+          generateId: () => 'test-id'
         }
       );
 
@@ -1383,10 +1399,9 @@ describe('doGenerate', () => {
         {},
         {
           provider: 'google.generative-ai.chat', // Simulate non-Vertex provider
-          baseURL: 'https://generativelanguage.googleapis.com/v1beta',
-          headers: {},
-          generateId: () => 'test-id',
-          isSupportedUrl: () => false
+          url: ({ path }) => `https://generativelanguage.googleapis.com/v1beta${path}`,
+          headers: () => ({}),
+          generateId: () => 'test-id'
         }
       );
 
@@ -1417,10 +1432,9 @@ describe('doGenerate', () => {
         {},
         {
           provider: 'google.generative-ai.chat', // Simulate non-Vertex provider
-          baseURL: 'https://generativelanguage.googleapis.com/v1beta',
-          headers: {},
-          generateId: () => 'test-id',
-          isSupportedUrl: () => false
+          url: ({ path }) => `https://generativelanguage.googleapis.com/v1beta${path}`,
+          headers: () => ({}),
+          generateId: () => 'test-id'
         }
       );
 
@@ -1453,13 +1467,40 @@ describe('doStream', () => {
   const TEST_URL_GEMINI_1_0_PRO = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:streamGenerateContent';
 
   const TEST_URL_GEMINI_1_5_FLASH = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent';
+  const ACCESS_TOKEN_BASE_URL = 'https://auth.example.com';
+  const ACCESS_TOKEN_URL = `${ACCESS_TOKEN_BASE_URL}/oauth/token`;
 
   const server = createTestServer({
     [TEST_URL_GEMINI_PRO]: {},
     [TEST_URL_GEMINI_2_0_PRO]: {},
     [TEST_URL_GEMINI_2_0_FLASH_EXP]: {},
     [TEST_URL_GEMINI_1_0_PRO]: {},
-    [TEST_URL_GEMINI_1_5_FLASH]: {}
+    [TEST_URL_GEMINI_1_5_FLASH]: {},
+    [ACCESS_TOKEN_URL]: {}
+  });
+
+  const prepareTokenResponse = (token: string) => {
+    server.urls[ACCESS_TOKEN_URL].response = {
+      type: 'json-value',
+      body: { access_token: token }
+    };
+  };
+
+  let provider: any;
+  let model: any;
+
+  beforeEach(() => {
+    prepareTokenResponse('token123');
+    provider = createSapAiCore({
+      deploymentUrl: 'https://generativelanguage.googleapis.com/v1beta',
+      tokenProvider: {
+        accessTokenBaseUrl: ACCESS_TOKEN_BASE_URL,
+        clientId: 'id',
+        clientSecret: 'secret'
+      },
+      fetch: server.fetch
+    });
+    model = provider.chat('sap-aicore/gemini-pro');
   });
 
   const prepareStreamResponse = ({
@@ -1548,7 +1589,7 @@ describe('doStream', () => {
     const events = await convertReadableStreamToArray(stream);
     const finishEvent = events.find((event) => event.type === 'finish');
 
-    expect(finishEvent?.type === 'finish' && finishEvent.providerMetadata?.google.groundingMetadata).toStrictEqual({
+    expect(finishEvent?.type === 'finish' && finishEvent.providerMetadata?.google?.groundingMetadata).toStrictEqual({
       webSearchQueries: ["What's the weather in Chicago this weekend?"],
       searchEntryPoint: {
         renderedContent: 'Sample rendered content for search results'
@@ -1678,14 +1719,14 @@ describe('doStream', () => {
 
   it('should pass headers', async () => {
     prepareStreamResponse({ content: [''] });
-    const provider = createGoogleGenerativeAI({
-      apiKey: 'test-api-key',
+    const provider = createSapAiCore({
+      deploymentUrl: 'https://generativelanguage.googleapis.com/v1beta',
       headers: {
         'Custom-Provider-Header': 'provider-header-value'
       }
     });
 
-    await provider.chat('gemini-pro').doStream({
+    await provider.chat('sap-aicore/gemini-pro').doStream({
       inputFormat: 'prompt',
       mode: { type: 'regular' },
       prompt: TEST_PROMPT,
@@ -1695,10 +1736,10 @@ describe('doStream', () => {
     });
 
     expect(server.calls[0]!.requestHeaders).toStrictEqual({
+      'ai-resource-group': 'default',
       'content-type': 'application/json',
       'custom-provider-header': 'provider-header-value',
-      'custom-request-header': 'request-header-value',
-      'x-goog-api-key': 'test-api-key'
+      'custom-request-header': 'request-header-value'
     });
   });
 
@@ -1790,7 +1831,7 @@ describe('doStream', () => {
     const events = await convertReadableStreamToArray(stream);
     const finishEvent = events.find((event) => event.type === 'finish');
 
-    expect(finishEvent?.type === 'finish' && finishEvent.providerMetadata?.google.safetyRatings).toStrictEqual([
+    expect(finishEvent?.type === 'finish' && finishEvent.providerMetadata?.google?.safetyRatings).toStrictEqual([
       {
         category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
         probability: 'NEGLIGIBLE',
@@ -1803,9 +1844,8 @@ describe('doStream', () => {
   });
 
   describe('search tool selection', () => {
-    const provider = createGoogleGenerativeAI({
-      apiKey: 'test-api-key',
-      generateId: () => 'test-id'
+    const provider = createSapAiCore({
+      deploymentUrl: 'https://generativelanguage.googleapis.com/v1beta'
     });
 
     it('should use googleSearch for gemini-2.0-pro', async () => {
@@ -1814,9 +1854,9 @@ describe('doStream', () => {
         url: TEST_URL_GEMINI_2_0_PRO
       });
 
-      const gemini2Pro = provider.languageModel('gemini-2.0-pro', {
+      const gemini2Pro = provider.chat('sap-aicore/gemini-2.0-pro', {
         useSearchGrounding: true
-      });
+      } as any);
       await gemini2Pro.doStream({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
@@ -1834,9 +1874,9 @@ describe('doStream', () => {
         url: TEST_URL_GEMINI_2_0_FLASH_EXP
       });
 
-      const gemini2Flash = provider.languageModel('gemini-2.0-flash-exp', {
+      const gemini2Flash = provider.chat('sap-aicore/gemini-2.0-flash-exp', {
         useSearchGrounding: true
-      });
+      } as any);
       await gemini2Flash.doStream({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
@@ -1854,9 +1894,9 @@ describe('doStream', () => {
         url: TEST_URL_GEMINI_1_0_PRO
       });
 
-      const geminiPro = provider.languageModel('gemini-1.0-pro', {
+      const geminiPro = provider.chat('sap-aicore/gemini-1.0-pro', {
         useSearchGrounding: true
-      });
+      } as any);
       await geminiPro.doStream({
         inputFormat: 'prompt',
         mode: { type: 'regular' },
@@ -1874,13 +1914,13 @@ describe('doStream', () => {
         url: TEST_URL_GEMINI_1_5_FLASH
       });
 
-      const geminiPro = provider.languageModel('gemini-1.5-flash', {
+      const geminiPro = provider.chat('sap-aicore/gemini-1.5-flash', {
         useSearchGrounding: true,
         dynamicRetrievalConfig: {
           mode: 'MODE_DYNAMIC',
           dynamicThreshold: 1
         }
-      });
+      } as any);
 
       await geminiPro.doStream({
         inputFormat: 'prompt',
@@ -1929,7 +1969,7 @@ describe('doStream', () => {
       {
         type: 'source',
         source: {
-          id: 'test-id',
+          id: expect.any(String),
           sourceType: 'url',
           title: 'Source Title',
           url: 'https://source.example.com'
