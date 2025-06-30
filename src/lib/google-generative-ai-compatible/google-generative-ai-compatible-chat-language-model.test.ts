@@ -4,9 +4,9 @@ import {
   GoogleGenerativeAICompatibleLanguageModel,
   groundingMetadataSchema
 } from './google-generative-ai-compatible-chat-language-model.js';
-import { createSapAiCore } from '../../sap-aicore-provider.js';
+import { createSapAiCore, type SapAiCoreProvider } from '../../sap-aicore-provider.js';
 import { type GoogleGenerativeAICompatibleGroundingMetadata } from './google-generative-ai-compatible-prompt.js';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 const TEST_PROMPT: LanguageModelV1Prompt = [{ role: 'user', content: [{ type: 'text', text: 'Hello' }] }];
 
@@ -163,22 +163,8 @@ describe('doGenerate', () => {
     };
   };
 
-  let provider: any;
-  let model: any;
-
-  beforeEach(() => {
-    prepareTokenResponse('token123');
-    provider = createSapAiCore({
-      deploymentUrl: 'https://generativelanguage.googleapis.com/v1beta',
-      tokenProvider: {
-        accessTokenBaseUrl: ACCESS_TOKEN_BASE_URL,
-        clientId: 'id',
-        clientSecret: 'secret'
-      },
-      fetch: server.fetch
-    });
-    model = provider.chat('sap-aicore/gemini-pro');
-  });
+  let provider: SapAiCoreProvider;
+  let model: GoogleGenerativeAICompatibleLanguageModel;
 
   const prepareJsonResponse = ({
     content = '',
@@ -227,6 +213,30 @@ describe('doGenerate', () => {
       }
     };
   };
+
+  beforeEach(() => {
+    prepareTokenResponse('token123');
+
+    process.env.AICORE_AUTH_URL = ACCESS_TOKEN_BASE_URL;
+    process.env.AICORE_CLIENT_ID = 'id';
+    process.env.AICORE_CLIENT_SECRET = 'secret';
+
+    provider = createSapAiCore({
+      deploymentUrl: 'https://generativelanguage.googleapis.com/v1beta',
+      tokenProvider: {
+        accessTokenBaseUrl: ACCESS_TOKEN_BASE_URL,
+        clientId: 'id',
+        clientSecret: 'secret'
+      }
+    });
+    model = provider.chat('sap-aicore/gemini-pro') as GoogleGenerativeAICompatibleLanguageModel;
+  });
+
+  afterEach(() => {
+    delete process.env.AICORE_AUTH_URL;
+    delete process.env.AICORE_CLIENT_ID;
+    delete process.env.AICORE_CLIENT_SECRET;
+  });
 
   it('should extract text response', async () => {
     prepareJsonResponse({ content: 'Hello, World!' });
@@ -1486,23 +1496,6 @@ describe('doStream', () => {
     };
   };
 
-  let provider: any;
-  let model: any;
-
-  beforeEach(() => {
-    prepareTokenResponse('token123');
-    provider = createSapAiCore({
-      deploymentUrl: 'https://generativelanguage.googleapis.com/v1beta',
-      tokenProvider: {
-        accessTokenBaseUrl: ACCESS_TOKEN_BASE_URL,
-        clientId: 'id',
-        clientSecret: 'secret'
-      },
-      fetch: server.fetch
-    });
-    model = provider.chat('sap-aicore/gemini-pro');
-  });
-
   const prepareStreamResponse = ({
     content,
     headers,
@@ -1546,6 +1539,32 @@ describe('doStream', () => {
       )
     };
   };
+
+  let provider: SapAiCoreProvider;
+  let model: GoogleGenerativeAICompatibleLanguageModel;
+
+  beforeEach(() => {
+    process.env.AICORE_AUTH_URL = ACCESS_TOKEN_BASE_URL;
+    process.env.AICORE_CLIENT_ID = 'id';
+    process.env.AICORE_CLIENT_SECRET = 'secret';
+
+    prepareTokenResponse('token123');
+    provider = createSapAiCore({
+      deploymentUrl: 'https://generativelanguage.googleapis.com/v1beta',
+      tokenProvider: {
+        accessTokenBaseUrl: ACCESS_TOKEN_BASE_URL,
+        clientId: 'id',
+        clientSecret: 'secret'
+      }
+    });
+    model = provider.chat('sap-aicore/gemini-pro') as GoogleGenerativeAICompatibleLanguageModel;
+  });
+
+  afterEach(() => {
+    delete process.env.AICORE_AUTH_URL;
+    delete process.env.AICORE_CLIENT_ID;
+    delete process.env.AICORE_CLIENT_SECRET;
+  });
 
   it('should expose grounding metadata in provider metadata on finish', async () => {
     prepareStreamResponse({
