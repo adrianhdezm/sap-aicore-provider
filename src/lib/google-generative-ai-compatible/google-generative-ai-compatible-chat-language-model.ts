@@ -9,18 +9,15 @@ import {
 import {
   type FetchFunction,
   type ParseResult,
-  type Resolvable,
   combineHeaders,
   createEventSourceResponseHandler,
   createJsonResponseHandler,
   parseProviderOptions,
-  postJsonToApi,
-  resolve
+  postJsonToApi
 } from '@ai-sdk/provider-utils';
 import { z } from 'zod';
 import { convertJSONSchemaToOpenAPISchema } from './convert-json-schema-to-openapi-schema.js';
 import { convertToGoogleGenerativeAICompatibleMessages } from './convert-to-google-generative-ai-compatible-messages.js';
-import { getModelPath } from './get-model-path.js';
 import { googleFailedResponseHandler } from './google-error.js';
 import { type GoogleGenerativeAICompatibleContentPart } from './google-generative-ai-compatible-prompt.js';
 import {
@@ -32,11 +29,10 @@ import { mapGoogleGenerativeAICompatibleFinishReason } from './map-google-genera
 
 type GoogleGenerativeAICompatibleConfig = {
   provider: string;
-  baseURL: string;
-  headers: Resolvable<Record<string, string | undefined>>;
+  url: (options: { modelId: string; path: string }) => string;
+  headers: () => Record<string, string | undefined>;
   fetch?: FetchFunction;
   generateId: () => string;
-  isSupportedUrl: (url: URL) => boolean;
 };
 
 export class GoogleGenerativeAICompatibleLanguageModel implements LanguageModelV1 {
@@ -209,23 +205,18 @@ export class GoogleGenerativeAICompatibleLanguageModel implements LanguageModelV
     }
   }
 
-  supportsUrl(url: URL): boolean {
-    return this.config.isSupportedUrl(url);
-  }
-
   async doGenerate(options: Parameters<LanguageModelV1['doGenerate']>[0]): Promise<Awaited<ReturnType<LanguageModelV1['doGenerate']>>> {
     const { args, warnings } = await this.getArgs(options);
     const body = JSON.stringify(args);
 
-    const mergedHeaders = combineHeaders(await resolve(this.config.headers), options.headers);
-
+    const url = `${this.config.url({ modelId: this.modelId, path: `/models/${this.modelId.replace('sap-aicore/', '')}:generateContent` })}`;
     const {
       responseHeaders,
       value: response,
       rawValue: rawResponse
     } = await postJsonToApi({
-      url: `${this.config.baseURL}/${getModelPath(this.modelId)}:generateContent`,
-      headers: mergedHeaders,
+      url,
+      headers: combineHeaders(this.config.headers(), options.headers),
       body: args,
       failedResponseHandler: googleFailedResponseHandler,
       successfulResponseHandler: createJsonResponseHandler(responseSchema),
@@ -283,11 +274,11 @@ export class GoogleGenerativeAICompatibleLanguageModel implements LanguageModelV
     const { args, warnings } = await this.getArgs(options);
 
     const body = JSON.stringify(args);
-    const headers = combineHeaders(await resolve(this.config.headers), options.headers);
+    const url = `${this.config.url({ modelId: this.modelId, path: `/models/${this.modelId.replace('sap-aicore/', '')}:streamGenerateContent?alt=sse` })}`;
 
     const { responseHeaders, value: response } = await postJsonToApi({
-      url: `${this.config.baseURL}/${getModelPath(this.modelId)}:streamGenerateContent?alt=sse`,
-      headers,
+      url,
+      headers: combineHeaders(this.config.headers(), options.headers),
       body: args,
       failedResponseHandler: googleFailedResponseHandler,
       successfulResponseHandler: createEventSourceResponseHandler(chunkSchema),

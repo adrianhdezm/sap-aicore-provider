@@ -5,7 +5,6 @@ import {
   groundingMetadataSchema
 } from './google-generative-ai-compatible-chat-language-model.js';
 import { type GoogleGenerativeAICompatibleGroundingMetadata } from './google-generative-ai-compatible-prompt.js';
-import { createGoogleGenerativeAI } from './google-provider';
 import { describe, expect, it } from 'vitest';
 
 const TEST_PROMPT: LanguageModelV1Prompt = [{ role: 'user', content: [{ type: 'text', text: 'Hello' }] }];
@@ -34,26 +33,6 @@ const provider = createGoogleGenerativeAI({
   generateId: () => 'test-id'
 });
 const model = provider.chat('gemini-pro');
-
-describe('supportsUrl', () => {
-  it('should use the isSupportedUrl function from config', () => {
-    const customModel = new GoogleGenerativeAICompatibleLanguageModel(
-      'gemini-pro',
-      {},
-      {
-        provider: 'google.generative-ai',
-        baseURL: 'https://generativelanguage.googleapis.com/v1beta',
-        headers: {},
-        generateId: () => 'test-id',
-        isSupportedUrl: (url: URL) => url.hostname === 'custom.example.com'
-      }
-    );
-
-    expect(customModel.supportsUrl(new URL('https://custom.example.com/test'))).toStrictEqual(true);
-
-    expect(customModel.supportsUrl(new URL('https://other.example.com/test'))).toStrictEqual(false);
-  });
-});
 
 describe('groundingMetadataSchema', () => {
   it('validates complete grounding metadata with web search results', () => {
