@@ -222,12 +222,7 @@ describe('doGenerate', () => {
     process.env.AICORE_CLIENT_SECRET = 'secret';
 
     provider = createSapAiCore({
-      deploymentUrl: 'https://generativelanguage.googleapis.com/v1beta',
-      tokenProvider: {
-        accessTokenBaseUrl: ACCESS_TOKEN_BASE_URL,
-        clientId: 'id',
-        clientSecret: 'secret'
-      }
+      deploymentUrl: 'https://generativelanguage.googleapis.com/v1beta'
     });
     model = provider.chat('sap-aicore/gemini-pro') as GoogleGenerativeAICompatibleLanguageModel;
   });
@@ -397,7 +392,7 @@ describe('doGenerate', () => {
       temperature: 0.5
     });
 
-    expect(await server.calls[0]!.requestBody).toStrictEqual({
+    expect(await server.calls[1]!.requestBody).toStrictEqual({
       contents: [
         {
           role: 'user',
@@ -429,7 +424,7 @@ describe('doGenerate', () => {
       }
     });
 
-    expect(await server.calls[0]!.requestBody).toStrictEqual({
+    expect(await server.calls[1]!.requestBody).toStrictEqual({
       contents: [
         {
           role: 'user',
@@ -473,7 +468,7 @@ describe('doGenerate', () => {
       prompt: TEST_PROMPT
     });
 
-    expect(await server.calls[0]!.requestBody).toStrictEqual({
+    expect(await server.calls[1]!.requestBody).toStrictEqual({
       generationConfig: {},
       contents: [{ role: 'user', parts: [{ text: 'Hello' }] }],
       tools: {
@@ -513,7 +508,7 @@ describe('doGenerate', () => {
       prompt: TEST_PROMPT
     });
 
-    expect(await server.calls[0]!.requestBody).toStrictEqual({
+    expect(await server.calls[1]!.requestBody).toStrictEqual({
       contents: [
         {
           role: 'user',
@@ -554,7 +549,7 @@ describe('doGenerate', () => {
       prompt: TEST_PROMPT
     });
 
-    expect(await server.calls[0]!.requestBody).toStrictEqual({
+    expect(await server.calls[1]!.requestBody).toStrictEqual({
       contents: [{ role: 'user', parts: [{ text: 'Hello' }] }],
       generationConfig: {
         responseMimeType: 'application/json',
@@ -590,7 +585,7 @@ describe('doGenerate', () => {
       prompt: TEST_PROMPT
     });
 
-    expect(await server.calls[0]!.requestBody).toStrictEqual({
+    expect(await server.calls[1]!.requestBody).toStrictEqual({
       contents: [{ role: 'user', parts: [{ text: 'Hello' }] }],
       generationConfig: {
         responseMimeType: 'application/json'
@@ -622,7 +617,7 @@ describe('doGenerate', () => {
       prompt: TEST_PROMPT
     });
 
-    expect(await server.calls[0]!.requestBody).toStrictEqual({
+    expect(await server.calls[1]!.requestBody).toStrictEqual({
       contents: [{ role: 'user', parts: [{ text: 'Hello' }] }],
       generationConfig: {},
       toolConfig: { functionCallingConfig: { mode: 'ANY' } },
@@ -664,10 +659,11 @@ describe('doGenerate', () => {
       }
     });
 
-    const requestHeaders = server.calls[0]!.requestHeaders;
+    const requestHeaders = server.calls[1]!.requestHeaders;
 
     expect(requestHeaders).toStrictEqual({
       'ai-resource-group': 'default',
+      authorization: 'Bearer token123',
       'content-type': 'application/json',
       'custom-provider-header': 'provider-header-value',
       'custom-request-header': 'request-header-value'
@@ -693,7 +689,7 @@ describe('doGenerate', () => {
       }
     });
 
-    expect(await server.calls[0]!.requestBody).toStrictEqual({
+    expect(await server.calls[1]!.requestBody).toStrictEqual({
       contents: [{ role: 'user', parts: [{ text: 'Hello' }] }],
       generationConfig: {
         responseMimeType: 'application/json',
@@ -717,7 +713,7 @@ describe('doGenerate', () => {
       prompt: TEST_PROMPT
     });
 
-    const requestBody = await server.calls[0]!.requestBody;
+    const requestBody = await server.calls[1]!.requestBody;
     expect(requestBody).toStrictEqual({
       contents: [{ role: 'user', parts: [{ text: 'Hello' }] }],
       generationConfig: {}
@@ -874,10 +870,6 @@ describe('doGenerate', () => {
   });
 
   describe('search tool selection', () => {
-    const provider = createSapAiCore({
-      deploymentUrl: 'https://generativelanguage.googleapis.com/v1beta'
-    });
-
     it('should use googleSearch for gemini-2.0-pro', async () => {
       prepareJsonResponse({
         url: TEST_URL_GEMINI_2_0_PRO
@@ -892,7 +884,7 @@ describe('doGenerate', () => {
         prompt: TEST_PROMPT
       });
 
-      expect(await server.calls[0]!.requestBody).toMatchObject({
+      expect(await server.calls[1]!.requestBody).toMatchObject({
         tools: { googleSearch: {} }
       });
     });
@@ -911,7 +903,7 @@ describe('doGenerate', () => {
         prompt: TEST_PROMPT
       });
 
-      expect(await server.calls[0]!.requestBody).toMatchObject({
+      expect(await server.calls[1]!.requestBody).toMatchObject({
         tools: { googleSearch: {} }
       });
     });
@@ -930,7 +922,7 @@ describe('doGenerate', () => {
         prompt: TEST_PROMPT
       });
 
-      expect(await server.calls[0]!.requestBody).toMatchObject({
+      expect(await server.calls[1]!.requestBody).toMatchObject({
         tools: { googleSearchRetrieval: {} }
       });
     });
@@ -954,7 +946,7 @@ describe('doGenerate', () => {
         prompt: TEST_PROMPT
       });
 
-      expect(await server.calls[0]!.requestBody).toMatchObject({
+      expect(await server.calls[1]!.requestBody).toMatchObject({
         tools: {
           googleSearchRetrieval: {
             dynamicRetrievalConfig: {
@@ -1095,7 +1087,7 @@ describe('doGenerate', () => {
       }
     });
 
-    expect(await server.calls[0]!.requestBody).toMatchObject({
+    expect(await server.calls[1]!.requestBody).toMatchObject({
       generationConfig: {
         responseModalities: ['TEXT', 'IMAGE']
       }
@@ -1415,13 +1407,9 @@ describe('doStream', () => {
     process.env.AICORE_CLIENT_SECRET = 'secret';
 
     prepareTokenResponse('token123');
+
     provider = createSapAiCore({
-      deploymentUrl: 'https://generativelanguage.googleapis.com/v1beta',
-      tokenProvider: {
-        accessTokenBaseUrl: ACCESS_TOKEN_BASE_URL,
-        clientId: 'id',
-        clientSecret: 'secret'
-      }
+      deploymentUrl: 'https://generativelanguage.googleapis.com/v1beta'
     });
     model = provider.chat('sap-aicore/gemini-pro') as GoogleGenerativeAICompatibleLanguageModel;
   });
@@ -1579,7 +1567,7 @@ describe('doStream', () => {
       prompt: TEST_PROMPT
     });
 
-    expect(await server.calls[0]!.requestBody).toStrictEqual({
+    expect(await server.calls[1]!.requestBody).toStrictEqual({
       contents: [
         {
           role: 'user',
@@ -1598,7 +1586,7 @@ describe('doStream', () => {
       prompt: TEST_PROMPT
     });
 
-    const searchParams = server.calls[0]!.requestUrlSearchParams;
+    const searchParams = server.calls[1]!.requestUrlSearchParams;
     expect(searchParams.get('alt')).toStrictEqual('sse');
   });
 
@@ -1620,8 +1608,9 @@ describe('doStream', () => {
       }
     });
 
-    expect(server.calls[0]!.requestHeaders).toStrictEqual({
+    expect(server.calls[1]!.requestHeaders).toStrictEqual({
       'ai-resource-group': 'default',
+      authorization: 'Bearer token123',
       'content-type': 'application/json',
       'custom-provider-header': 'provider-header-value',
       'custom-request-header': 'request-header-value'
@@ -1637,7 +1626,7 @@ describe('doStream', () => {
       prompt: TEST_PROMPT
     });
 
-    expect(await server.calls[0]!.requestBody).toStrictEqual({
+    expect(await server.calls[1]!.requestBody).toStrictEqual({
       generationConfig: {},
       contents: [{ role: 'user', parts: [{ text: 'Hello' }] }]
     });
@@ -1729,10 +1718,6 @@ describe('doStream', () => {
   });
 
   describe('search tool selection', () => {
-    const provider = createSapAiCore({
-      deploymentUrl: 'https://generativelanguage.googleapis.com/v1beta'
-    });
-
     it('should use googleSearch for gemini-2.0-pro', async () => {
       prepareStreamResponse({
         content: [''],
@@ -1748,7 +1733,7 @@ describe('doStream', () => {
         prompt: TEST_PROMPT
       });
 
-      expect(await server.calls[0]!.requestBody).toMatchObject({
+      expect(await server.calls[1]!.requestBody).toMatchObject({
         tools: { googleSearch: {} }
       });
     });
@@ -1768,7 +1753,7 @@ describe('doStream', () => {
         prompt: TEST_PROMPT
       });
 
-      expect(await server.calls[0]!.requestBody).toMatchObject({
+      expect(await server.calls[1]!.requestBody).toMatchObject({
         tools: { googleSearch: {} }
       });
     });
@@ -1788,7 +1773,7 @@ describe('doStream', () => {
         prompt: TEST_PROMPT
       });
 
-      expect(await server.calls[0]!.requestBody).toMatchObject({
+      expect(await server.calls[1]!.requestBody).toMatchObject({
         tools: { googleSearchRetrieval: {} }
       });
     });
@@ -1813,7 +1798,7 @@ describe('doStream', () => {
         prompt: TEST_PROMPT
       });
 
-      expect(await server.calls[0]!.requestBody).toMatchObject({
+      expect(await server.calls[1]!.requestBody).toMatchObject({
         tools: {
           googleSearchRetrieval: {
             dynamicRetrievalConfig: {
@@ -1971,7 +1956,7 @@ describe('doStream', () => {
       }
     });
 
-    expect(await server.calls[0]!.requestBody).toMatchObject({
+    expect(await server.calls[1]!.requestBody).toMatchObject({
       contents: [
         {
           role: 'user',
