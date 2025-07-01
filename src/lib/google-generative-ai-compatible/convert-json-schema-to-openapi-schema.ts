@@ -1,4 +1,4 @@
-import { JSONSchema7Definition } from '@ai-sdk/provider';
+import { type JSONSchema7Definition } from 'json-schema';
 
 export function convertJSONSchemaToOpenAPISchema(jsonSchema: JSONSchema7Definition): unknown {
   // parameters need to be undefined if they are empty objects:
@@ -80,7 +80,7 @@ export function convertJSONSchemaToOpenAPISchema(jsonSchema: JSONSchema7Definiti
 
       if (nonNullSchemas.length === 1) {
         // If there's only one non-null schema, convert it and make it nullable
-        const converted = convertJSONSchemaToOpenAPISchema(nonNullSchemas[0]);
+        const converted = convertJSONSchemaToOpenAPISchema(nonNullSchemas[0]!);
         if (typeof converted === 'object') {
           result.nullable = true;
           Object.assign(result, converted);
