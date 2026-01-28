@@ -50,13 +50,8 @@ echo "New version: $new_version"
 # Update package.json with the new version
 jq --arg new_version "$new_version" '.version = $new_version' package.json > tmp.$$.json && mv tmp.$$.json package.json
 
-# Update package-lock.json with the new version if it exists
-if [ -f package-lock.json ]; then
-  jq --arg new_version "$new_version" '.version = $new_version' package-lock.json > tmp.$$.lock && mv tmp.$$.lock package-lock.json
-fi
-
 # Stage and commit the version bump
-git add package.json package-lock.json
+git add package.json
 git commit -m "chore(release): 🔧 Bump version to $new_version"
 
 # Push the commit and the tag to the remote repository (assuming main branch)
