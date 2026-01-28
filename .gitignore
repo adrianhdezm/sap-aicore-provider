@@ -2,9 +2,9 @@
 node_modules
 
 # Build files and cache
-/.cache
-/build
-/dist
+.cache
+build
+dist
 
 # Environment files
 .env

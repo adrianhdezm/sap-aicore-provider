@@ -31,3 +31,6 @@ jobs:
 
       - name: Run project tests and checks
         run: pnpm run ci:check
+
+      - name: Check package exports
+        run: pnpm --filter @ai-foundry/sap-aicore-provider run exports:check

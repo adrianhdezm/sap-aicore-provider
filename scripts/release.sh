@@ -14,8 +14,10 @@ if ! command -v jq &> /dev/null; then
   exit 1
 fi
 
+PACKAGE_JSON="packages/sap-aicore-provider/package.json"
+
 # Read the current version from package.json
-current_version=$(jq -r '.version' package.json)
+current_version=$(jq -r '.version' "$PACKAGE_JSON")
 if [ -z "$current_version" ]; then
   echo "Error: Unable to find version in package.json"
   exit 1
@@ -48,10 +50,10 @@ new_version="${major}.${minor}.${patch}"
 echo "New version: $new_version"
 
 # Update package.json with the new version
-jq --arg new_version "$new_version" '.version = $new_version' package.json > tmp.$$.json && mv tmp.$$.json package.json
+jq --arg new_version "$new_version" '.version = $new_version' "$PACKAGE_JSON" > tmp.$$.json && mv tmp.$$.json "$PACKAGE_JSON"
 
 # Stage and commit the version bump
-git add package.json
+git add "$PACKAGE_JSON"
 git commit -m "chore(release): 🔧 Bump version to $new_version"
 
 # Push the commit and the tag to the remote repository (assuming main branch)
