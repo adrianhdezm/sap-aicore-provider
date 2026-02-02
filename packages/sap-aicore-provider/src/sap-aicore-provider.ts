@@ -35,7 +35,7 @@ export interface SapAiCoreProviderSettings {
   baseUrl?: string;
 }
 
-export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiCoreProvider {
+export function createSapAiCoreProvider(options: SapAiCoreProviderSettings = {}): SapAiCoreProvider {
   const resourceGroup = loadOptionalSetting({
     settingValue: options.resourceGroup,
     environmentVariableName: 'AICORE_RESOURCE_GROUP'
@@ -198,4 +198,4 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
   return provider;
 }
 
-export const sapAiCore = createSapAiCore();
+export const sapAiCore = createSapAiCoreProvider();

@@ -28,34 +28,22 @@ const { text } = await generateText({
 
 ### Configuration
 
-You can configure the SAP AI Core provider using the `createSapAiCore` function. Below are the most common options:
+You can configure the SAP AI Core provider using the `createSapAiCoreProvider` function. Below are the most common options:
 
 #### Basic Example
 
 ```ts
-import { createSapAiCore } from '@ai-foundry/sap-aicore-provider';
+import { createSapAiCoreProvider } from '@ai-foundry/sap-aicore-provider';
 
-const sapAiCore = createSapAiCore({
-  deploymentUrl: 'https://your-sap-aicore-instance', // Required: Your SAP AI Core deployment URL
+const sapAiCore = createSapAiCoreProvider({
   headers: {
     'Custom-Header': 'value' // Optional: Add any custom headers
-  }
-});
-```
-
-#### Using a Token Provider
-
-To automatically fetch an access token before each request, use the `tokenProvider` option:
-
-```ts
-const sapAiCore = createSapAiCore({
-  deploymentUrl: 'https://your-sap-aicore-instance',
-  tokenProvider: {
-    accessTokenBaseUrl: 'https://auth.example.com/token', // Auth endpoint
-    clientId: 'your-client-id',
-    clientSecret: 'your-client-secret',
-    cacheMaxAgeMs: 3600000 // Optional: Token cache duration (default 1h)
-  }
+  },
+  baseUrl: 'https://my-sap-aicore-endpoint.com', // Optional: Custom base URL
+  resourceGroup: 'my-resource-group', // Optional: Specify the resource group
+  accessTokenUrl: 'https://my-auth-url.com/oauth2/token' // Optional: Custom token URL,
+  clientId: 'my-client-id', // Optional: Client ID for authentication
+  clientSecret: 'my-client-secret' // Optional: Client Secret for authentication
 });
 ```
 
@@ -63,7 +51,7 @@ const sapAiCore = createSapAiCore({
 
 You can also provide configuration values using environment variables:
 
-- `AICORE_DEPLOYMENT_URL`
+- `AICORE_BASE_URL`
 - `AICORE_AUTH_URL`
 - `AICORE_CLIENT_ID`
 - `AICORE_CLIENT_SECRET`
