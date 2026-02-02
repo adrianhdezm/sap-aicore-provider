@@ -1,11 +1,8 @@
-import { OpenAICompatibleChatLanguageModel, type OpenAICompatibleChatSettings } from '@ai-sdk/openai-compatible';
-import type { LanguageModelV1 } from '@ai-sdk/provider';
-import { type FetchFunction, generateId, loadSetting } from '@ai-sdk/provider-utils';
-import { createFetchWithToken, type TokenProviderConfig } from './lib/fetch-with-token-provider.js';
-import type { ConverseCompatibleChatSettings } from './lib/converse-compatible/converse-compatible-chat-settings.js';
-import { ConverseCompatibleChatLanguageModel } from './lib/converse-compatible/converse-compatible-chat-language-model.js';
-import { GoogleGenerativeAICompatibleLanguageModel } from './lib/google-generative-ai-compatible/google-generative-ai-compatible-chat-language-model.js';
-import type { GoogleGenerativeAICompatibleSettings } from './lib/google-generative-ai-compatible/google-generative-ai-compatible-settings.js';
+import { OpenAICompatibleChatLanguageModel } from '@ai-sdk/openai-compatible';
+import { NoSuchModelError, type LanguageModelV3 } from '@ai-sdk/provider';
+import { loadOptionalSetting, loadSetting } from '@ai-sdk/provider-utils';
+import { fetchWithInterceptors } from './lib/fetch-with-interceptors.js';
+import { SapAiCoreApiClient } from './lib/sap-aicore-api-client.js';
 
 export type SapAiCoreModelId =
   | 'sap-aicore/gpt-4o'
@@ -13,110 +10,192 @@ export type SapAiCoreModelId =
   | 'sap-aicore/gpt-4.1'
   | 'sap-aicore/gpt-4.1-nano'
   | 'sap-aicore/gpt-4.1-mini'
+  | 'sap-aicore/gpt-5'
+  | 'sap-aicore/gpt-5-mini'
+  | 'sap-aicore/gpt-5-nano'
   | 'sap-aicore/o3'
   | 'sap-aicore/o3-mini'
   | 'sap-aicore/o1'
   | 'sap-aicore/o4-mini'
-  | 'sap-aicore/anthropic--claude-3-haiku'
-  | 'sap-aicore/anthropic--claude-3-opus'
-  | 'sap-aicore/anthropic--claude-3-sonnet'
-  | 'sap-aicore/anthropic--claude-4-sonnet'
-  | 'sap-aicore/anthropic--claude-3.5-sonnet'
-  | 'sap-aicore/anthropic--claude-3.7-sonnet'
-  | 'sap-aicore/gemini-1.5-pro'
-  | 'sap-aicore/gemini-1.5-flash'
-  | 'sap-aicore/gemini-2.0-flash'
-  | 'sap-aicore/gemini-2.0-flash-lite'
-  | 'sap-aicore/gemini-2.5-pro'
-  | 'sap-aicore/gemini-2.5-flash'
   | (string & {});
 
 export const AZURE_OPENAI_API_VERSION = '2025-04-01-preview';
 
-export type SapAiCoreChatSettings = OpenAICompatibleChatSettings | ConverseCompatibleChatSettings | GoogleGenerativeAICompatibleSettings;
-
 export interface SapAiCoreProvider {
-  (modelId: SapAiCoreModelId, settings?: SapAiCoreChatSettings): LanguageModelV1;
-  chat(modelId: SapAiCoreModelId, settings?: SapAiCoreChatSettings): LanguageModelV1;
+  (modelId: SapAiCoreModelId): LanguageModelV3;
+  chat(modelId: SapAiCoreModelId): LanguageModelV3;
 }
 
 export interface SapAiCoreProviderSettings {
   deploymentUrl?: string;
   headers?: Record<string, string>;
-  aiResourceGroup?: string;
-  tokenProvider?: TokenProviderConfig;
-  fetch?: FetchFunction;
+  resourceGroup?: string;
+  accessTokenUrl?: string;
+  clientId?: string;
+  clientSecret?: string;
+  baseUrl?: string;
 }
 
 export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiCoreProvider {
+  const resourceGroup = loadOptionalSetting({
+    settingValue: options.resourceGroup,
+    environmentVariableName: 'AICORE_RESOURCE_GROUP'
+  });
+
   const getHeaders = () => ({
     'Content-Type': 'application/json',
-    'AI-Resource-Group': options.aiResourceGroup ?? 'default',
+    'AI-Resource-Group': resourceGroup ?? 'default',
     ...options.headers
   });
 
-  const url = ({ modelId, path }: { path: string; modelId: SapAiCoreModelId }) => {
-    const deploymentUrl = loadSetting({
-      settingValue: options.deploymentUrl,
-      environmentVariableName: 'AICORE_DEPLOYMENT_URL',
-      settingName: 'deploymentUrl',
-      description: 'SAP AI Core Deployment URL'
+  const url = ({ path, modelId }: { path: string; modelId: string }) => {
+    const baseUrl = loadSetting({
+      settingValue: options.baseUrl,
+      environmentVariableName: 'AICORE_BASE_URL',
+      settingName: 'baseUrl',
+      description: 'SAP AI Core Base URL'
     });
-    const url = new URL(`${deploymentUrl}${path}`);
-    if (modelId.startsWith('sap-aicore/anthropic')) {
-      // For Anthropic models, we return the URL without the API version
-      return url.toString();
-    } else if (modelId.startsWith('sap-aicore/gemini')) {
-      return url.toString();
-    } else {
-      // For openai models, we append the API version
-      url.searchParams.set('api-version', AZURE_OPENAI_API_VERSION);
-      return url.toString();
-    }
+    const url = new URL(`${baseUrl}/<deployment:${modelId}>${path}`);
+    // For openai models, we append the API version
+    url.searchParams.set('api-version', AZURE_OPENAI_API_VERSION);
+    return url.toString();
   };
 
-  // Wrap the fetch function with token provider options
-  const fetch = createFetchWithToken(options.tokenProvider, options.fetch);
+  const accessTokenUrl = loadSetting({
+    settingValue: options?.accessTokenUrl,
+    environmentVariableName: 'AICORE_AUTH_URL',
+    settingName: 'accessTokenUrl',
+    description: 'SAP AI Core Access Token Base URL'
+  });
+  const clientId = loadSetting({
+    settingValue: options?.clientId,
+    environmentVariableName: 'AICORE_CLIENT_ID',
+    settingName: 'clientId',
+    description: 'SAP AI Core Client ID'
+  });
 
-  const createChatModel = (modelId: SapAiCoreModelId, settings: SapAiCoreChatSettings = {}) => {
+  const clientSecret = loadSetting({
+    settingValue: options?.clientSecret,
+    environmentVariableName: 'AICORE_CLIENT_SECRET',
+    settingName: 'clientSecret',
+    description: 'SAP AI Core Client Secret'
+  });
+
+  const baseUrl = loadSetting({
+    settingValue: options?.baseUrl,
+    environmentVariableName: 'AICORE_BASE_URL',
+    settingName: 'baseUrl',
+    description: 'SAP AI Core Base URL'
+  });
+
+  const sapAiCoreApiClient = new SapAiCoreApiClient({
+    clientId,
+    clientSecret,
+    accessTokenUrl,
+    baseUrl,
+    resourceGroup
+  });
+
+  // Wrap the fetch function with token provider options
+  const { fetch, interceptors } = fetchWithInterceptors();
+  interceptors.request.use(async (req) => {
+    // Add Authorization header
+    const headers = new Headers(req.headers);
+    const token = await sapAiCoreApiClient.getAccessToken();
+    headers.set('Authorization', `Bearer ${token}`);
+    return new Request(req, { headers });
+  });
+  interceptors.request.use(async (req) => {
+    const url = decodeURIComponent(req.url);
+    // Set Deployment URL if not already set
+    if (url.includes('/<deployment:')) {
+      const modelIdMatch = url.match(/\/<deployment:([^>]+)>/);
+      if (modelIdMatch && modelIdMatch[1]) {
+        const modelId = modelIdMatch[1];
+        const deploymentUrl = await sapAiCoreApiClient.getDeploymentUrl(modelId);
+
+        const urlParts = url.split('/<deployment:' + modelId + '>');
+        const newUrl = deploymentUrl + urlParts[1];
+
+        return new Request(newUrl, req);
+      }
+    }
+    return req;
+  });
+
+  const createChatModel = (modelId: SapAiCoreModelId) => {
+    return new OpenAICompatibleChatLanguageModel(modelId, {
+      provider: 'sap-aicore.chat',
+      url,
+      headers: getHeaders,
+      fetch,
+      supportsStructuredOutputs: true
+    });
+  };
+
+  const provider = function (modelId: SapAiCoreModelId) {
+    if (new.target) {
+      throw new Error('The SAP AI Core provider function cannot be called with the new keyword.');
+    }
+
     if (!modelId.startsWith('sap-aicore/')) {
       throw new Error(`Invalid modelId: ${modelId}. Model IDs must start with 'sap-aicore/'.`);
     }
 
-    if (modelId.startsWith('sap-aicore/anthropic')) {
-      // For Anthropic models, we use the Converse-compatible chat model
-      const chatModelSettings = settings as ConverseCompatibleChatSettings;
-      return new ConverseCompatibleChatLanguageModel(modelId, chatModelSettings, {
-        provider: 'sap-aicore.chat',
-        url,
-        headers: getHeaders,
-        fetch,
-        generateId
-      });
-    } else if (modelId.startsWith('sap-aicore/gemini')) {
-      // For Gemini models, we use the Google Generative AI compatible chat model
-      const googleGenerativeAISettings = settings as GoogleGenerativeAICompatibleSettings;
-      return new GoogleGenerativeAICompatibleLanguageModel(modelId, googleGenerativeAISettings, {
-        provider: 'sap-aicore.chat',
-        url,
-        headers: getHeaders,
-        fetch,
-        generateId
-      });
-    } else {
-      const chatSettings = settings as OpenAICompatibleChatSettings;
-      return new OpenAICompatibleChatLanguageModel(modelId, chatSettings, {
-        provider: 'sap-aicore.chat',
-        url,
-        headers: getHeaders,
-        fetch,
-        supportsStructuredOutputs: true
-      });
-    }
+    return createChatModel(modelId.replace('sap-aicore/', ''));
   };
 
-  const provider = (modelId: SapAiCoreModelId, settings?: SapAiCoreChatSettings) => createChatModel(modelId, settings);
+  provider.specificationVersion = 'v3' as const;
   provider.chat = createChatModel;
+
+  provider.languageModel = (modelId: string) => {
+    throw new NoSuchModelError({
+      modelId,
+      modelType: 'languageModel',
+      message: 'SAP AI Core does not provide language models'
+    });
+  };
+
+  provider.embeddingModel = (modelId: string) => {
+    throw new NoSuchModelError({
+      modelId,
+      modelType: 'embeddingModel',
+      message: 'SAP AI Core does not provide embedding models'
+    });
+  };
+
+  provider.imageModel = (modelId: string) => {
+    throw new NoSuchModelError({
+      modelId,
+      modelType: 'imageModel',
+      message: 'SAP AI Core does not provide image models'
+    });
+  };
+
+  provider.transcriptionModel = (modelId: string) => {
+    throw new NoSuchModelError({
+      modelId,
+      modelType: 'transcriptionModel',
+      message: 'SAP AI Core does not provide transcription models'
+    });
+  };
+
+  provider.speechModel = (modelId: string) => {
+    throw new NoSuchModelError({
+      modelId,
+      modelType: 'speechModel',
+      message: 'SAP AI Core does not provide speech models'
+    });
+  };
+
+  provider.rerankingModel = (modelId: string) => {
+    throw new NoSuchModelError({
+      modelId,
+      modelType: 'rerankingModel',
+      message: 'SAP AI Core does not provide reranking models'
+    });
+  };
+
   return provider;
 }
 

@@ -5,15 +5,15 @@
   "description": "Basic example using SAP AI Core Provider",
   "type": "module",
   "scripts": {
-    "dev": "node --env-file=.env --import=tsx src/index.ts"
+    "start": "node --env-file=.env --import=tsx src/index.ts"
   },
   "dependencies": {
     "@ai-foundry/sap-aicore-provider": "workspace:*",
-    "ai": "^4.3.16"
+    "ai": "^6.0.62"
   },
   "devDependencies": {
-    "@types/node": "^24.0.1",
-    "tsx": "^4.19.4",
-    "typescript": "^5.8.3"
+    "@types/node": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
   }
 }

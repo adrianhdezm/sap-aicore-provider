@@ -1,8 +1,14 @@
 {
   "name": "sap-aicore-utils",
-  "private": true,
-  "packageManager": "pnpm@10.26.0",
   "description": "SAP AI Core Utils",
+  "private": true,
+  "packageManager": "pnpm@10.28.2",
+  "engines": {
+    "node": ">=24"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/adrianhdezm/sap-aicore-provider.git"
@@ -16,13 +22,13 @@
   "type": "module",
   "scripts": {
     "build": "pnpm -r run build",
-    "format": "prettier --write . --cache",
-    "format:check": "prettier --check . --cache",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "lint": "pnpm -r run lint",
     "test": "pnpm -r run test",
     "ci:check": "pnpm run build && pnpm run format && pnpm run lint && pnpm run test"
   },
-  "devDependencies": {
+  "dependencies": {
     "prettier": "^3.5.3"
   }
 }
