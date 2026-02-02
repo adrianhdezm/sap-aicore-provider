@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
 import { SapAiCoreApiClient, type SapAiCoreParams } from './sap-aicore-api-client.js';
 
 describe('SapAiCoreApiClient', () => {
@@ -9,12 +9,12 @@ describe('SapAiCoreApiClient', () => {
     baseUrl: 'https://api.example.com'
   };
 
-  let mockFetch: ReturnType<typeof vi.fn>;
+  let mockFetch: Mock<typeof fetch>;
   let originalFetch: typeof globalThis.fetch;
 
   beforeEach(() => {
     originalFetch = globalThis.fetch;
-    mockFetch = vi.fn();
+    mockFetch = vi.fn<typeof fetch>();
     globalThis.fetch = mockFetch;
   });
 
@@ -147,9 +147,9 @@ describe('SapAiCoreApiClient', () => {
       expect(deploymentUrl).toBe('https://deployment.example.com/gpt-4o');
       expect(mockFetch).toHaveBeenCalledTimes(2);
 
-      const deploymentsCall = mockFetch.mock.calls[1];
+      const deploymentsCall = mockFetch.mock.calls[1]!;
       expect(deploymentsCall[0]).toBe('https://api.example.com/v2/lm/deployments?scenarioId=foundation-models&status=RUNNING');
-      expect(deploymentsCall[1]).toEqual({
+      expect((deploymentsCall[1] as RequestInit)).toEqual({
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -234,8 +234,11 @@ describe('SapAiCoreApiClient', () => {
 
       await client.getDeploymentUrl('gpt-4o');
 
-      const deploymentsCall = mockFetch.mock.calls[1];
-      expect(deploymentsCall[1].headers['AI-Resource-Group']).toBe('my-custom-group');
+      const deploymentsCall = mockFetch.mock.calls[1]!;
+      expect((deploymentsCall[1] as RequestInit).headers as Record<string, string>).toHaveProperty(
+        'AI-Resource-Group',
+        'my-custom-group'
+      );
     });
 
     it('should cache different models separately', async () => {

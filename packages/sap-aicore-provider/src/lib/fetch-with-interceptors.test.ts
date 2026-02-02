@@ -1,12 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { fetchWithInterceptors } from './fetch-with-interceptors.js';
 
 describe('fetchWithInterceptors', () => {
   const mockResponse = new Response(JSON.stringify({ success: true }), { status: 200 });
-  let mockFetch: ReturnType<typeof vi.fn>;
+  let mockFetch: Mock<typeof fetch>;
 
   beforeEach(() => {
-    mockFetch = vi.fn().mockResolvedValue(mockResponse);
+    mockFetch = vi.fn<typeof fetch>().mockResolvedValue(mockResponse);
   });
 
   describe('basic fetch behavior', () => {
@@ -16,7 +16,7 @@ describe('fetchWithInterceptors', () => {
       await fetch('https://api.example.com/test');
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
-      const calledRequest = mockFetch.mock.calls[0][0] as Request;
+      const calledRequest = mockFetch.mock.calls[0]![0] as Request;
       expect(calledRequest.url).toBe('https://api.example.com/test');
     });
 
@@ -27,7 +27,7 @@ describe('fetchWithInterceptors', () => {
       await fetch(request);
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
-      const calledRequest = mockFetch.mock.calls[0][0] as Request;
+      const calledRequest = mockFetch.mock.calls[0]![0] as Request;
       expect(calledRequest.url).toBe('https://api.example.com/test');
       expect(calledRequest.method).toBe('POST');
     });
@@ -41,7 +41,7 @@ describe('fetchWithInterceptors', () => {
       });
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
-      const calledRequest = mockFetch.mock.calls[0][0] as Request;
+      const calledRequest = mockFetch.mock.calls[0]![0] as Request;
       expect(calledRequest.method).toBe('PUT');
       expect(calledRequest.headers.get('Content-Type')).toBe('application/json');
     });
@@ -67,7 +67,7 @@ describe('fetchWithInterceptors', () => {
 
       await fetch('https://api.example.com/test');
 
-      const calledRequest = mockFetch.mock.calls[0][0] as Request;
+      const calledRequest = mockFetch.mock.calls[0]![0] as Request;
       expect(calledRequest.headers.get('Authorization')).toBe('Bearer token123');
     });
 
@@ -92,7 +92,7 @@ describe('fetchWithInterceptors', () => {
       await fetch('https://api.example.com/test');
 
       expect(callOrder).toEqual(['first', 'second']);
-      const calledRequest = mockFetch.mock.calls[0][0] as Request;
+      const calledRequest = mockFetch.mock.calls[0]![0] as Request;
       expect(calledRequest.headers.get('X-First')).toBe('value1');
       expect(calledRequest.headers.get('X-Second')).toBe('value2');
     });
@@ -109,7 +109,7 @@ describe('fetchWithInterceptors', () => {
 
       await fetch('https://api.example.com/test');
 
-      const calledRequest = mockFetch.mock.calls[0][0] as Request;
+      const calledRequest = mockFetch.mock.calls[0]![0] as Request;
       expect(calledRequest.headers.get('X-Async')).toBe('async-value');
     });
 
@@ -131,7 +131,7 @@ describe('fetchWithInterceptors', () => {
 
       await fetch('https://api.example.com/test');
 
-      const calledRequest = mockFetch.mock.calls[0][0] as Request;
+      const calledRequest = mockFetch.mock.calls[0]![0] as Request;
       expect(calledRequest.headers.get('X-Step')).toBe('1-2');
     });
 
@@ -145,7 +145,7 @@ describe('fetchWithInterceptors', () => {
 
       await fetch('https://api.example.com/placeholder');
 
-      const calledRequest = mockFetch.mock.calls[0][0] as Request;
+      const calledRequest = mockFetch.mock.calls[0]![0] as Request;
       expect(calledRequest.url).toBe('https://api.example.com/resolved-path');
     });
   });
@@ -160,7 +160,7 @@ describe('fetchWithInterceptors', () => {
 
       await fetch('https://api.example.com/test');
 
-      const calledRequest = mockFetch.mock.calls[0][0] as Request;
+      const calledRequest = mockFetch.mock.calls[0]![0] as Request;
       expect(calledRequest.url).toBe('https://api.example.com/test');
     });
 
@@ -171,7 +171,7 @@ describe('fetchWithInterceptors', () => {
 
       await fetch('https://api.example.com/test');
 
-      const calledRequest = mockFetch.mock.calls[0][0] as Request;
+      const calledRequest = mockFetch.mock.calls[0]![0] as Request;
       expect(calledRequest.url).toBe('https://api.example.com/test');
     });
 
@@ -196,7 +196,7 @@ describe('fetchWithInterceptors', () => {
 
       await fetch('https://api.example.com/test');
 
-      const calledRequest = mockFetch.mock.calls[0][0] as Request;
+      const calledRequest = mockFetch.mock.calls[0]![0] as Request;
       expect(calledRequest.headers.get('X-First')).toBe('value1');
       expect(calledRequest.headers.get('X-Third')).toBe('value3');
     });
@@ -216,7 +216,7 @@ describe('fetchWithInterceptors', () => {
 
       await fetch('https://api.example.com/test');
 
-      const calledRequest = mockFetch.mock.calls[0][0] as Request;
+      const calledRequest = mockFetch.mock.calls[0]![0] as Request;
       expect(calledRequest.headers.get('X-Should-Not-Exist')).toBeNull();
     });
 
@@ -239,7 +239,7 @@ describe('fetchWithInterceptors', () => {
 
       await fetch('https://api.example.com/test');
 
-      const calledRequest = mockFetch.mock.calls[0][0] as Request;
+      const calledRequest = mockFetch.mock.calls[0]![0] as Request;
       expect(calledRequest.headers.get('X-Old')).toBeNull();
       expect(calledRequest.headers.get('X-New')).toBe('new-value');
     });
