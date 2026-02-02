@@ -1,0 +1,262 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { SapAiCoreApiClient, type SapAiCoreParams } from './sap-aicore-api-client.js';
+
+describe('SapAiCoreApiClient', () => {
+  const defaultParams: SapAiCoreParams = {
+    clientId: 'test-client-id',
+    clientSecret: 'test-client-secret',
+    accessTokenUrl: 'https://auth.example.com',
+    baseUrl: 'https://api.example.com'
+  };
+
+  let mockFetch: ReturnType<typeof vi.fn>;
+  let originalFetch: typeof globalThis.fetch;
+
+  beforeEach(() => {
+    originalFetch = globalThis.fetch;
+    mockFetch = vi.fn();
+    globalThis.fetch = mockFetch;
+  });
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+    vi.useRealTimers();
+  });
+
+  describe('constructor', () => {
+    it('should initialize with required parameters', () => {
+      const client = new SapAiCoreApiClient(defaultParams);
+
+      expect(client.defaultHeaders).toEqual({
+        'Content-Type': 'application/json',
+        'AI-Resource-Group': 'default'
+      });
+    });
+
+    it('should use custom resourceGroup when provided', () => {
+      const client = new SapAiCoreApiClient({
+        ...defaultParams,
+        resourceGroup: 'custom-group'
+      });
+
+      expect(client.defaultHeaders['AI-Resource-Group']).toBe('custom-group');
+    });
+
+    it('should use default resourceGroup when not provided', () => {
+      const client = new SapAiCoreApiClient(defaultParams);
+
+      expect(client.defaultHeaders['AI-Resource-Group']).toBe('default');
+    });
+  });
+
+  describe('getAccessToken', () => {
+    it('should fetch a new access token', async () => {
+      mockFetch.mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 'new-token' }), { status: 200 }));
+
+      const client = new SapAiCoreApiClient(defaultParams);
+      const token = await client.getAccessToken();
+
+      expect(token).toBe('new-token');
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(mockFetch).toHaveBeenCalledWith('https://auth.example.com/oauth/token?grant_type=client_credentials', {
+        method: 'GET',
+        headers: {
+          Authorization: `Basic ${btoa('test-client-id:test-client-secret')}`
+        }
+      });
+    });
+
+    it('should return cached token when not expired', async () => {
+      mockFetch.mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 'cached-token' }), { status: 200 }));
+
+      const client = new SapAiCoreApiClient(defaultParams);
+
+      const token1 = await client.getAccessToken();
+      const token2 = await client.getAccessToken();
+
+      expect(token1).toBe('cached-token');
+      expect(token2).toBe('cached-token');
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('should fetch new token when cached token is expired', async () => {
+      vi.useFakeTimers();
+      const now = new Date('2024-01-01T00:00:00Z');
+      vi.setSystemTime(now);
+
+      mockFetch
+        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 'first-token' }), { status: 200 }))
+        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 'second-token' }), { status: 200 }));
+
+      const client = new SapAiCoreApiClient(defaultParams);
+
+      const token1 = await client.getAccessToken();
+      expect(token1).toBe('first-token');
+
+      // Advance time by 56 minutes (token expires after 55 minutes)
+      vi.advanceTimersByTime(56 * 60 * 1000);
+
+      const token2 = await client.getAccessToken();
+      expect(token2).toBe('second-token');
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+    });
+
+    it('should throw error when token fetch fails', async () => {
+      mockFetch.mockResolvedValueOnce(new Response(null, { status: 401, statusText: 'Unauthorized' }));
+
+      const client = new SapAiCoreApiClient(defaultParams);
+
+      await expect(client.getAccessToken()).rejects.toThrow('Token fetch failed: 401 Unauthorized');
+    });
+  });
+
+  describe('getDeploymentUrl', () => {
+    const mockDeploymentsResponse = {
+      resources: [
+        {
+          details: {
+            resources: {
+              backendDetails: {
+                model: { name: 'gpt-4o' }
+              }
+            }
+          },
+          deploymentUrl: 'https://deployment.example.com/gpt-4o'
+        },
+        {
+          details: {
+            resources: {
+              backendDetails: {
+                model: { name: 'gpt-3.5-turbo' }
+              }
+            }
+          },
+          deploymentUrl: 'https://deployment.example.com/gpt-3.5-turbo'
+        }
+      ]
+    };
+
+    it('should fetch and return deployment URL for a model', async () => {
+      mockFetch
+        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 'test-token' }), { status: 200 }))
+        .mockResolvedValueOnce(new Response(JSON.stringify(mockDeploymentsResponse), { status: 200 }));
+
+      const client = new SapAiCoreApiClient(defaultParams);
+      const deploymentUrl = await client.getDeploymentUrl('gpt-4o');
+
+      expect(deploymentUrl).toBe('https://deployment.example.com/gpt-4o');
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+
+      const deploymentsCall = mockFetch.mock.calls[1];
+      expect(deploymentsCall[0]).toBe('https://api.example.com/v2/lm/deployments?scenarioId=foundation-models&status=RUNNING');
+      expect(deploymentsCall[1]).toEqual({
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'AI-Resource-Group': 'default',
+          Authorization: 'Bearer test-token'
+        }
+      });
+    });
+
+    it('should return cached deployment URL on subsequent calls', async () => {
+      mockFetch
+        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 'test-token' }), { status: 200 }))
+        .mockResolvedValueOnce(new Response(JSON.stringify(mockDeploymentsResponse), { status: 200 }));
+
+      const client = new SapAiCoreApiClient(defaultParams);
+
+      const url1 = await client.getDeploymentUrl('gpt-4o');
+      const url2 = await client.getDeploymentUrl('gpt-4o');
+
+      expect(url1).toBe('https://deployment.example.com/gpt-4o');
+      expect(url2).toBe('https://deployment.example.com/gpt-4o');
+      // Only 2 calls: one for token, one for deployments (second getDeploymentUrl uses cache)
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+    });
+
+    it('should throw error when deployment fetch fails', async () => {
+      mockFetch
+        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 'test-token' }), { status: 200 }))
+        .mockResolvedValueOnce(new Response(null, { status: 500, statusText: 'Internal Server Error' }));
+
+      const client = new SapAiCoreApiClient(defaultParams);
+
+      await expect(client.getDeploymentUrl('gpt-4o')).rejects.toThrow('Deployment Url fetch failed: 500 Internal Server Error');
+    });
+
+    it('should throw error when no deployment found for model', async () => {
+      mockFetch
+        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 'test-token' }), { status: 200 }))
+        .mockResolvedValueOnce(new Response(JSON.stringify({ resources: [] }), { status: 200 }));
+
+      const client = new SapAiCoreApiClient(defaultParams);
+
+      await expect(client.getDeploymentUrl('non-existent-model')).rejects.toThrow(
+        'No running deployment found for model: non-existent-model'
+      );
+    });
+
+    it('should throw error when deployment has no URL', async () => {
+      const responseWithoutUrl = {
+        resources: [
+          {
+            details: {
+              resources: {
+                backendDetails: {
+                  model: { name: 'gpt-4o' }
+                }
+              }
+            }
+            // deploymentUrl is missing
+          }
+        ]
+      };
+
+      mockFetch
+        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 'test-token' }), { status: 200 }))
+        .mockResolvedValueOnce(new Response(JSON.stringify(responseWithoutUrl), { status: 200 }));
+
+      const client = new SapAiCoreApiClient(defaultParams);
+
+      await expect(client.getDeploymentUrl('gpt-4o')).rejects.toThrow('No running deployment found for model: gpt-4o');
+    });
+
+    it('should use custom resourceGroup in headers', async () => {
+      mockFetch
+        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 'test-token' }), { status: 200 }))
+        .mockResolvedValueOnce(new Response(JSON.stringify(mockDeploymentsResponse), { status: 200 }));
+
+      const client = new SapAiCoreApiClient({
+        ...defaultParams,
+        resourceGroup: 'my-custom-group'
+      });
+
+      await client.getDeploymentUrl('gpt-4o');
+
+      const deploymentsCall = mockFetch.mock.calls[1];
+      expect(deploymentsCall[1].headers['AI-Resource-Group']).toBe('my-custom-group');
+    });
+
+    it('should cache different models separately', async () => {
+      mockFetch
+        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 'test-token' }), { status: 200 }))
+        .mockResolvedValueOnce(new Response(JSON.stringify(mockDeploymentsResponse), { status: 200 }))
+        .mockResolvedValueOnce(new Response(JSON.stringify(mockDeploymentsResponse), { status: 200 }));
+
+      const client = new SapAiCoreApiClient(defaultParams);
+
+      const url1 = await client.getDeploymentUrl('gpt-4o');
+      const url2 = await client.getDeploymentUrl('gpt-3.5-turbo');
+      const url3 = await client.getDeploymentUrl('gpt-4o'); // Should use cache
+      const url4 = await client.getDeploymentUrl('gpt-3.5-turbo'); // Should use cache
+
+      expect(url1).toBe('https://deployment.example.com/gpt-4o');
+      expect(url2).toBe('https://deployment.example.com/gpt-3.5-turbo');
+      expect(url3).toBe('https://deployment.example.com/gpt-4o');
+      expect(url4).toBe('https://deployment.example.com/gpt-3.5-turbo');
+      // 1 token call + 2 deployment calls (cache hits for url3 and url4)
+      expect(mockFetch).toHaveBeenCalledTimes(3);
+    });
+  });
+});

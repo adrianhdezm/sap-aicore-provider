@@ -27,7 +27,6 @@ export interface SapAiCoreProvider {
 }
 
 export interface SapAiCoreProviderSettings {
-  deploymentUrl?: string;
   headers?: Record<string, string>;
   resourceGroup?: string;
   accessTokenUrl?: string;
