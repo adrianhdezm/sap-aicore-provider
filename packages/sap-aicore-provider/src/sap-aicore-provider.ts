@@ -42,25 +42,6 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
     environmentVariableName: 'AICORE_RESOURCE_GROUP'
   });
 
-  const getHeaders = () => ({
-    'Content-Type': 'application/json',
-    'AI-Resource-Group': resourceGroup ?? 'default',
-    ...options.headers
-  });
-
-  const url = ({ path, modelId }: { path: string; modelId: string }) => {
-    const baseUrl = loadSetting({
-      settingValue: options.baseUrl,
-      environmentVariableName: 'AICORE_BASE_URL',
-      settingName: 'baseUrl',
-      description: 'SAP AI Core Base URL'
-    });
-    const url = new URL(`${baseUrl}/<deployment:${modelId}>${path}`);
-    // For openai models, we append the API version
-    url.searchParams.set('api-version', AZURE_OPENAI_API_VERSION);
-    return url.toString();
-  };
-
   const accessTokenUrl = loadSetting({
     settingValue: options?.accessTokenUrl,
     environmentVariableName: 'AICORE_AUTH_URL',
@@ -87,6 +68,25 @@ export function createSapAiCore(options: SapAiCoreProviderSettings = {}): SapAiC
     settingName: 'baseUrl',
     description: 'SAP AI Core Base URL'
   });
+
+  const getHeaders = () => ({
+    'Content-Type': 'application/json',
+    'AI-Resource-Group': resourceGroup ?? 'default',
+    ...options.headers
+  });
+
+  const url = ({ path, modelId }: { path: string; modelId: string }) => {
+    const baseUrl = loadSetting({
+      settingValue: options.baseUrl,
+      environmentVariableName: 'AICORE_BASE_URL',
+      settingName: 'baseUrl',
+      description: 'SAP AI Core Base URL'
+    });
+    const url = new URL(`${baseUrl}/<deployment:${modelId}>${path}`);
+    // For openai models, we append the API version
+    url.searchParams.set('api-version', AZURE_OPENAI_API_VERSION);
+    return url.toString();
+  };
 
   const sapAiCoreApiClient = new SapAiCoreApiClient({
     clientId,
