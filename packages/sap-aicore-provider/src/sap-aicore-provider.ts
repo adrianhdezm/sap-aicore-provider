@@ -22,6 +22,12 @@ export type SapAiCoreModelId =
 export const AZURE_OPENAI_API_VERSION = '2025-04-01-preview';
 
 export interface SapAiCoreProvider {
+  languageModel(modelId: SapAiCoreModelId): never;
+  embeddingModel(modelId: SapAiCoreModelId): never;
+  imageModel(modelId: SapAiCoreModelId): never;
+  transcriptionModel(modelId: SapAiCoreModelId): never;
+  speechModel(modelId: SapAiCoreModelId): never;
+  rerankingModel(modelId: SapAiCoreModelId): never;
   (modelId: SapAiCoreModelId): LanguageModelV3;
   chat(modelId: SapAiCoreModelId): LanguageModelV3;
 }
