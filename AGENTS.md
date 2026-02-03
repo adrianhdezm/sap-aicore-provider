@@ -34,8 +34,11 @@ pnpm --filter @ai-foundry/sap-aicore-provider exports:check
 ### Monorepo Structure
 
 - `packages/sap-aicore-provider/` - Main provider package (`@ai-foundry/sap-aicore-provider`)
+- `packages/sap-aicore-nano-sdk/` - Nano SDK package (`@ai-foundry/sap-aicore-nano-sdk`)
 - `examples/basic/` - Basic usage example with `generateText`
 - `examples/streaming/` - Streaming example with `streamText`
+- `examples/mastra-agents/` - Example using Mastra Agents with SAP AI Core
+- `examples/openai-agents/` - Example using OpenAI Agents SDK with SAP AI Core
 
 ### Core Components
 
@@ -45,7 +48,7 @@ pnpm --filter @ai-foundry/sap-aicore-provider exports:check
 - `sapAiCore` - Default instance export for simple usage
 - Only chat models are supported; other model types throw `NoSuchModelError`
 
-**API Client** ([sap-aicore-api-client.ts](packages/sap-aicore-provider/src/lib/sap-aicore-api-client.ts))
+**API Client** ([sap-aicore-nano-sdk.ts](packages/sap-aicore-nano-sdk/src/sap-aicore-nano-sdk.ts))
 
 - Handles OAuth 2.0 client credentials authentication with token caching
 - Resolves model IDs to deployment URLs via SAP AI Core API
