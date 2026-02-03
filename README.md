@@ -1,67 +1,47 @@
-# sap-aicore-provider
+# sap-aicore-utils
 
-SAP AI Core Foundation Models provider plugin for Vercel AI SDK
+Monorepo for SAP AI Core Foundation Models tooling in the Vercel AI SDK ecosystem.
 
-## Overview
+**What’s in this repo**
 
-This package enables seamless integration of SAP AI Core Foundation Models with the [Vercel AI SDK](https://sdk.vercel.ai/). Use it to access SAP-hosted foundation language models in your Node.js AI applications.
+Packages:
+- `packages/sap-aicore-provider/` - Vercel AI SDK provider (`@ai-foundry/sap-aicore-provider`)
+- `packages/sap-aicore-nano-sdk/` - Lightweight SDK helpers
 
-## Installation
+Examples:
+- `examples/basic/` - Basic `generateText` example
+- `examples/streaming/` - Streaming `streamText` example
+
+**Quick start**
 
 ```sh
-npm install @ai-foundry/sap-aicore-provider ai
+pnpm install
+pnpm run build
 ```
 
-## Usage
+**Common commands**
 
-### Using sap-aicore-provider
-
-```ts
-import { sapAiCore } from '@ai-foundry/sap-aicore-provider';
-import { generateText } from 'ai';
-
-const { text } = await generateText({
-  model: sapAiCore('sap-aicore/gpt-4o'),
-  prompt: 'Hello, how are you?'
-});
+```sh
+pnpm run ci:check     # Full CI validation
+pnpm run build        # Build all packages with tsup
+pnpm run test         # Run vitest tests
+pnpm run lint         # TypeScript type checking
+pnpm run format       # Format with Prettier
+pnpm run format:check # Check formatting
 ```
 
-### Configuration
+**Run examples**
 
-You can configure the SAP AI Core provider using the `createSapAiCoreProvider` function. Below are the most common options:
-
-#### Basic Example
-
-```ts
-import { createSapAiCoreProvider } from '@ai-foundry/sap-aicore-provider';
-
-const sapAiCore = createSapAiCoreProvider({
-  headers: {
-    'Custom-Header': 'value' // Optional: Add any custom headers
-  },
-  baseUrl: 'https://my-sap-aicore-endpoint.com', // Optional: Custom base URL
-  resourceGroup: 'my-resource-group', // Optional: Specify the resource group
-  accessTokenUrl: 'https://my-auth-url.com/oauth2/token' // Optional: Custom token URL,
-  clientId: 'my-client-id', // Optional: Client ID for authentication
-  clientSecret: 'my-client-secret' // Optional: Client Secret for authentication
-});
+```sh
+pnpm --filter basic-example start
+pnpm --filter streaming-example start
 ```
 
-#### Environment Variables
+**Package docs**
 
-You can also provide configuration values using environment variables:
+- Provider package: `packages/sap-aicore-provider/README.md`
+- Nano SDK package: `packages/sap-aicore-nano-sdk/README.md`
 
-- `AICORE_BASE_URL`
-- `AICORE_AUTH_URL`
-- `AICORE_CLIENT_ID`
-- `AICORE_CLIENT_SECRET`
-
-Tokens are cached for one hour by default to reduce token provider requests.
-
-## License
+**License**
 
 MIT
-
-## Contributing
-
-Contributions are welcome! Please open issues or pull requests on [GitHub](https://github.com/adrianhdezm/sap-aicore-utils).
