@@ -149,7 +149,7 @@ describe('SapAiCoreApiClient', () => {
 
       const deploymentsCall = mockFetch.mock.calls[1]!;
       expect(deploymentsCall[0]).toBe('https://api.example.com/v2/lm/deployments?scenarioId=foundation-models&status=RUNNING');
-      expect((deploymentsCall[1] as RequestInit)).toEqual({
+      expect(deploymentsCall[1] as RequestInit).toEqual({
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -235,10 +235,7 @@ describe('SapAiCoreApiClient', () => {
       await client.getDeploymentUrl('gpt-4o');
 
       const deploymentsCall = mockFetch.mock.calls[1]!;
-      expect((deploymentsCall[1] as RequestInit).headers as Record<string, string>).toHaveProperty(
-        'AI-Resource-Group',
-        'my-custom-group'
-      );
+      expect((deploymentsCall[1] as RequestInit).headers as Record<string, string>).toHaveProperty('AI-Resource-Group', 'my-custom-group');
     });
 
     it('should cache different models separately', async () => {

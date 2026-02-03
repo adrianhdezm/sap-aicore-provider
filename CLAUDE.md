@@ -22,6 +22,9 @@ pnpm run format:check # Check formatting
 # Run the basic example
 pnpm --filter basic-example start
 
+# Run the streaming example
+pnpm --filter streaming-example start
+
 # Validate package exports
 pnpm --filter @ai-foundry/sap-aicore-provider exports:check
 ```
@@ -31,21 +34,25 @@ pnpm --filter @ai-foundry/sap-aicore-provider exports:check
 ### Monorepo Structure
 
 - `packages/sap-aicore-provider/` - Main provider package (`@ai-foundry/sap-aicore-provider`)
-- `examples/basic/` - Usage example application
+- `examples/basic/` - Basic usage example with `generateText`
+- `examples/streaming/` - Streaming example with `streamText`
 
 ### Core Components
 
 **Provider Factory** ([sap-aicore-provider.ts](packages/sap-aicore-provider/src/sap-aicore-provider.ts))
+
 - `createSapAiCore()` - Factory function that configures and returns a Vercel AI SDK v3-compatible provider
 - `sapAiCore` - Default instance export for simple usage
 - Only chat models are supported; other model types throw `NoSuchModelError`
 
 **API Client** ([sap-aicore-api-client.ts](packages/sap-aicore-provider/src/lib/sap-aicore-api-client.ts))
+
 - Handles OAuth 2.0 client credentials authentication with token caching
 - Resolves model IDs to deployment URLs via SAP AI Core API
 - Caches deployment URLs to minimize API calls
 
 **Request Interceptors** ([fetch-with-interceptors.ts](packages/sap-aicore-provider/src/lib/fetch-with-interceptors.ts))
+
 - Custom fetch wrapper that chains request interceptors
 - Injects Authorization headers with Bearer tokens
 - Resolves `<deployment:modelId>` URL placeholders to actual deployment URLs
@@ -75,6 +82,7 @@ Use Conventional Commits with Gitmoji:
 ```
 
 Types and their gitmoji:
+
 - `feat`: ✨ (new feature)
 - `refactor`: ♻️ (code restructuring)
 - `fix`: 🐛 (bug fix)

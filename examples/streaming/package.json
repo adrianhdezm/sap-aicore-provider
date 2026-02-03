@@ -1,8 +1,8 @@
 {
-  "name": "basic-example",
+  "name": "streaming-example",
   "private": true,
   "version": "0.0.0",
-  "description": "Basic example using SAP AI Core Provider",
+  "description": "Streaming example using SAP AI Core Provider with streamText",
   "type": "module",
   "scripts": {
     "start": "node --env-file=.env --import=tsx src/index.ts"
