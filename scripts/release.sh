@@ -14,10 +14,12 @@ if ! command -v jq &> /dev/null; then
   exit 1
 fi
 
-PACKAGE_JSON="packages/sap-aicore-provider/package.json"
+# Package paths
+PROVIDER_PKG="packages/sap-aicore-provider/package.json"
+NANO_SDK_PKG="packages/sap-aicore-nano-sdk/package.json"
 
-# Read the current version from package.json
-current_version=$(jq -r '.version' "$PACKAGE_JSON")
+# Read the current version from provider package.json (source of truth)
+current_version=$(jq -r '.version' "$PROVIDER_PKG")
 if [ -z "$current_version" ]; then
   echo "Error: Unable to find version in package.json"
   exit 1
@@ -49,11 +51,12 @@ esac
 new_version="${major}.${minor}.${patch}"
 echo "New version: $new_version"
 
-# Update package.json with the new version
-jq --arg new_version "$new_version" '.version = $new_version' "$PACKAGE_JSON" > tmp.$$.json && mv tmp.$$.json "$PACKAGE_JSON"
+# Update both package.json files with the new version
+jq --arg new_version "$new_version" '.version = $new_version' "$PROVIDER_PKG" > tmp.$$.json && mv tmp.$$.json "$PROVIDER_PKG"
+jq --arg new_version "$new_version" '.version = $new_version' "$NANO_SDK_PKG" > tmp.$$.json && mv tmp.$$.json "$NANO_SDK_PKG"
 
 # Stage and commit the version bump
-git add "$PACKAGE_JSON"
+git add "$PROVIDER_PKG" "$NANO_SDK_PKG"
 git commit -m "chore(release): 🔧 Bump version to $new_version"
 
 # Push the commit and the tag to the remote repository (assuming main branch)

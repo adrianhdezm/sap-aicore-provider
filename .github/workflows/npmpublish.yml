@@ -1,4 +1,4 @@
-name: Publish NPM Package
+name: Publish NPM Packages
 
 on:
   push:
@@ -30,7 +30,12 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      - name: Publish
+      - name: Publish nano-sdk
+        run: pnpm --filter @ai-foundry/sap-aicore-nano-sdk publish --access=public --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
+
+      - name: Publish provider
         run: pnpm --filter @ai-foundry/sap-aicore-provider publish --access=public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
