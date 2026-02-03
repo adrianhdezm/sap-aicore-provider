@@ -1,37 +1,49 @@
 # Mastra Agents Example
 
-A simple example demonstrating how to use the SAP AI Core Provider with Mastra Agents.
+Mastra agents wired to SAP AI Core through the provider.
 
-## Setup
+## Prerequisites
 
-1. Copy the environment template:
+1. Node.js 24+ (see `.node-version`).
+2. `pnpm` installed.
 
-   ```bash
-   cp .env.example .env
-   ```
+## Configure
 
-2. Fill in your SAP AI Core credentials in the `.env` file.
+Create a `.env` file in `examples/mastra-agents`:
 
-3. Install dependencies from the monorepo root:
+```bash
+AICORE_BASE_URL=...
+AICORE_AUTH_URL=...
+AICORE_CLIENT_ID=...
+AICORE_CLIENT_SECRET=...
+AICORE_RESOURCE_GROUP=default
+```
 
-   ```bash
-   pnpm install
-   ```
+## Install and build
 
-4. Build the provider package:
+From the repo root:
 
-   ```bash
-   pnpm run build
-   ```
+```bash
+pnpm install
+pnpm run build
+```
 
-## Running
+## Run
+
+Development mode:
+
+```bash
+pnpm --filter mastra-agents dev
+```
+
+Production mode:
 
 ```bash
 pnpm --filter mastra-agents start
 ```
 
-This will run the example which generates a text response using an AI model through SAP AI Core.
+Mastra Studio is available at `http://localhost:4111`.
 
-Open [http://localhost:4111](http://localhost:4111) in your browser to access [Mastra Studio](https://mastra.ai/docs/getting-started/studio). It provides an interactive UI for building and testing your agents, along with a REST API that exposes your Mastra application as a local service. This lets you start building without worrying about integration right away.
+## Notes
 
-You can start editing files inside the `src/mastra` directory. The development server will automatically reload whenever you make changes.
+The default agent uses `sap-aicore/gpt-4o` in `src/mastra/agents/weather-agent.ts`. Update the model id if your deployment name differs.

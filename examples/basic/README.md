@@ -1,33 +1,41 @@
 # Basic Example
 
-A simple example demonstrating how to use the SAP AI Core Provider with the Vercel AI SDK.
+Minimal `generateText` usage with the SAP AI Core Provider and the Vercel AI SDK.
 
-## Setup
+## Prerequisites
 
-1. Copy the environment template:
+1. Node.js 24+ (see `.node-version`).
+2. `pnpm` installed.
 
-   ```bash
-   cp .env.example .env
-   ```
+## Configure
 
-2. Fill in your SAP AI Core credentials in the `.env` file.
+Create a `.env` file in `examples/basic` with your SAP AI Core credentials:
 
-3. Install dependencies from the monorepo root:
+```bash
+AICORE_BASE_URL=...
+AICORE_AUTH_URL=...
+AICORE_CLIENT_ID=...
+AICORE_CLIENT_SECRET=...
+AICORE_RESOURCE_GROUP=default
+```
 
-   ```bash
-   pnpm install
-   ```
+## Install and build
 
-4. Build the provider package:
+From the repo root:
 
-   ```bash
-   pnpm run build
-   ```
+```bash
+pnpm install
+pnpm run build
+```
 
-## Running
+## Run
 
 ```bash
 pnpm --filter basic-example start
 ```
 
-This will run the example which generates a text response using an AI model through SAP AI Core.
+Expected output includes a `Response:` line and token `Usage` for the prompt sent in `src/index.ts`.
+
+## Notes
+
+If you see authentication errors, confirm `AICORE_BASE_URL` and `AICORE_AUTH_URL` match your SAP AI Core tenant endpoints.
