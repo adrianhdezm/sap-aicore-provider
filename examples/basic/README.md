@@ -27,7 +27,7 @@ A simple example demonstrating how to use the SAP AI Core Provider with the Verc
 ## Running
 
 ```bash
-pnpm --filter basic-example dev
+pnpm --filter basic-example start
 ```
 
 This will run the example which generates a text response using an AI model through SAP AI Core.
