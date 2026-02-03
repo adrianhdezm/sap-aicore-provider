@@ -2,7 +2,7 @@
 
 Monorepo for SAP AI Core Foundation Models tooling in the Vercel AI SDK ecosystem.
 
-**What’s in this repo**
+## What’s in this repo
 
 Packages:
 
@@ -16,14 +16,14 @@ Examples:
 - `examples/mastra-agents/` - Example using Mastra Agents with SAP AI Core
 - `examples/openai-agents/` - Example using OpenAI Agents SDK with SAP AI Core
 
-**Quick start**
+## Quick start
 
 ```sh
 pnpm install
 pnpm run build
 ```
 
-**Common commands**
+## Common commands
 
 ```sh
 pnpm run ci:check     # Full CI validation
@@ -34,18 +34,17 @@ pnpm run format       # Format with Prettier
 pnpm run format:check # Check formatting
 ```
 
-**Run examples**
+## Run examples
 
 ```sh
 pnpm --filter basic-example start
 pnpm --filter streaming-example start
 ```
 
-**Package docs**
-
-- Provider package: `packages/sap-aicore-provider/README.md`
-- Nano SDK package: `packages/sap-aicore-nano-sdk/README.md`
-
-**License**
+## License
 
 MIT
+
+## Contributing
+
+Contributions are welcome! Please open issues or pull requests on [GitHub](https://github.com/adrianhdezm/sap-aicore-utils).
