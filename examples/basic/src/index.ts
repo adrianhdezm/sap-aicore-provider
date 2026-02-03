@@ -10,12 +10,13 @@ async function main() {
   // - AICORE_RESOURCE_GROUP: Resource group (optional, defaults to 'default')
 
   // Generate text using the Vercel AI SDK
-  const { text } = await generateText({
+  const { text, usage } = await generateText({
     model: sapAiCore('sap-aicore/gpt-5'),
     prompt: 'Define in one sentence what is SAP AI Core and how does it help enterprises?'
   });
 
   console.log('Response:', text);
+  console.log('Usage:', usage);
 }
 
 main().catch(console.error);

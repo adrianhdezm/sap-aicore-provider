@@ -14,7 +14,10 @@ async function main() {
   // Stream text using the Vercel AI SDK
   const result = streamText({
     model: sapAiCore('sap-aicore/gpt-4.1'),
-    prompt: 'Explain how SAP AI Core helps enterprises adopt AI. List 3 key benefits.'
+    prompt: 'Explain how SAP AI Core helps enterprises adopt AI. List 3 key benefits.',
+    onFinish: (event) => {
+      console.log('\nonFinish', event.totalUsage);
+    }
   });
 
   // Stream the response to the console as it arrives
@@ -23,10 +26,6 @@ async function main() {
   }
 
   console.log('\n\n--- Stream completed ---');
-
-  // Access final metadata after streaming completes
-  const usage = await result.usage;
-  console.log('\nUsage:', usage);
 }
 
 main().catch(console.error);
