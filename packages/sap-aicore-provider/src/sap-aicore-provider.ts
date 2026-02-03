@@ -128,7 +128,8 @@ export function createSapAiCoreProvider(options: SapAiCoreProviderSettings = {})
       url,
       headers: getHeaders,
       fetch,
-      supportsStructuredOutputs: true
+      supportsStructuredOutputs: true,
+      includeUsage: true
     });
   };
 
