@@ -1,19 +1,25 @@
 {
-  "name": "@ai-foundry/sap-aicore-provider",
-  "description": "SAP AI Core Foundation Models provider plugin for Vercel AI SDK",
-  "version": "0.0.15",
+  "name": "@ai-foundry/sap-aicore-nano-sdk",
+  "description": "Lightweight SDK for SAP AI Core API authentication and deployment management",
+  "version": "0.0.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/adrianhdezm/sap-aicore-utils.git",
-    "directory": "packages/sap-aicore-provider"
+    "directory": "packages/sap-aicore-nano-sdk"
   },
-  "keywords": [],
+  "keywords": [
+    "sap",
+    "aicore",
+    "sdk",
+    "authentication",
+    "deployment"
+  ],
   "author": "Adrian Hernandez Mendez",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/adrianhdezm/sap-aicore-utils/issues"
   },
-  "homepage": "https://github.com/adrianhdezm/sap-aicore-utils/tree/main/packages/sap-aicore-provider#readme",
+  "homepage": "https://github.com/adrianhdezm/sap-aicore-utils/tree/main/packages/sap-aicore-nano-sdk#readme",
   "files": [
     "dist",
     "README.md",
@@ -42,12 +48,5 @@
     "tsup": "^8.5.1",
     "typescript": "catalog:",
     "vitest": "^4.0.18"
-  },
-  "dependencies": {
-    "@ai-foundry/sap-aicore-nano-sdk": "workspace:*",
-    "@ai-sdk/openai-compatible": "^2.0.24",
-    "@ai-sdk/provider": "^3.0.6",
-    "@ai-sdk/provider-utils": "^4.0.11",
-    "zod": "^4.3.6"
   }
 }

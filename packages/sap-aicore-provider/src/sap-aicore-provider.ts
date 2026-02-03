@@ -2,7 +2,7 @@ import { OpenAICompatibleChatLanguageModel } from '@ai-sdk/openai-compatible';
 import { NoSuchModelError, type LanguageModelV3 } from '@ai-sdk/provider';
 import { loadOptionalSetting, loadSetting } from '@ai-sdk/provider-utils';
 import { fetchWithInterceptors } from './lib/fetch-with-interceptors.js';
-import { SapAiCoreApiClient } from './lib/sap-aicore-api-client.js';
+import { SapAiCoreApiClient } from '@ai-foundry/sap-aicore-nano-sdk';
 
 export type SapAiCoreModelId =
   | 'sap-aicore/gpt-4o'
