@@ -6,8 +6,8 @@ Monorepo for SAP AI Core Foundation Models tooling in the Vercel AI SDK ecosyste
 
 Packages:
 
-- `packages/sap-aicore-provider/` - Vercel AI SDK provider (`@ai-foundry/sap-aicore-provider`)
-- `packages/sap-aicore-nano-sdk/` - Lightweight SDK helpers for SAP AI Core (`@ai-foundry/sap-aicore-nano-sdk`)
+- [`packages/sap-aicore-provider/`](./packages/sap-aicore-provider/LICENSE) - Vercel AI SDK provider (`@ai-foundry/sap-aicore-provider`)
+- [`packages/sap-aicore-nano-sdk/`](./packages/sap-aicore-nano-sdk/LICENSE) - Lightweight SDK helpers for SAP AI Core (`@ai-foundry/sap-aicore-nano-sdk`)
 
 Examples:
 
@@ -40,10 +40,6 @@ pnpm run format:check # Check formatting
 pnpm --filter basic-example start
 pnpm --filter streaming-example start
 ```
-
-## License
-
-MIT
 
 ## Contributing
 
