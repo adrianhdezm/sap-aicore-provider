@@ -18,14 +18,14 @@ Examples:
 
 ## Quick start
 
-```sh
+```bash
 pnpm install
 pnpm run build
 ```
 
 ## Common commands
 
-```sh
+```bash
 pnpm run ci:check     # Full CI validation
 pnpm run build        # Build all packages with tsup
 pnpm run test         # Run vitest tests
@@ -36,9 +36,11 @@ pnpm run format:check # Check formatting
 
 ## Run examples
 
-```sh
+```bash
 pnpm --filter basic-example start
 pnpm --filter streaming-example start
+pnpm --filter mastra-agents-example start
+pnpm --filter openai-agents-example start
 ```
 
 ## Contributing
