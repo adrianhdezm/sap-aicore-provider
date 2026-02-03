@@ -1,0 +1,20 @@
+{
+  "name": "openai-agents",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Basic example using SAP AI Core Provider",
+  "type": "module",
+  "scripts": {
+    "start": "node --env-file=.env --import=tsx src/index.ts"
+  },
+  "dependencies": {
+    "@ai-foundry/sap-aicore-provider": "workspace:*",
+    "@openai/agents": "^0.4.5",
+    "@openai/agents-extensions": "^0.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
+  }
+}
