@@ -5,12 +5,16 @@ Monorepo for SAP AI Core Foundation Models tooling in the Vercel AI SDK ecosyste
 **What’s in this repo**
 
 Packages:
+
 - `packages/sap-aicore-provider/` - Vercel AI SDK provider (`@ai-foundry/sap-aicore-provider`)
-- `packages/sap-aicore-nano-sdk/` - Lightweight SDK helpers
+- `packages/sap-aicore-nano-sdk/` - Lightweight SDK helpers for SAP AI Core (`@ai-foundry/sap-aicore-nano-sdk`)
 
 Examples:
+
 - `examples/basic/` - Basic `generateText` example
 - `examples/streaming/` - Streaming `streamText` example
+- `examples/mastra-agents/` - Example using Mastra Agents with SAP AI Core
+- `examples/openai-agents/` - Example using OpenAI Agents SDK with SAP AI Core
 
 **Quick start**
 

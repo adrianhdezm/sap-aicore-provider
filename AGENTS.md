@@ -33,8 +33,8 @@ pnpm --filter @ai-foundry/sap-aicore-provider exports:check
 
 ### Monorepo Structure
 
-- `packages/sap-aicore-provider/` - Main provider package (`@ai-foundry/sap-aicore-provider`)
-- `packages/sap-aicore-nano-sdk/` - Nano SDK package (`@ai-foundry/sap-aicore-nano-sdk`)
+- `packages/sap-aicore-provider/` - Main Vercel AI SDK provider package for SAP AI Core (`@ai-foundry/sap-aicore-provider`)
+- `packages/sap-aicore-nano-sdk/` - Lightweight SDK helpers for SAP AI Core (`@ai-foundry/sap-aicore-nano-sdk`)
 - `examples/basic/` - Basic usage example with `generateText`
 - `examples/streaming/` - Streaming example with `streamText`
 - `examples/mastra-agents/` - Example using Mastra Agents with SAP AI Core
