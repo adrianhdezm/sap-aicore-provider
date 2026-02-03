@@ -4,16 +4,16 @@
   "version": "0.0.13",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/adrianhdezm/sap-aicore-provider.git",
+    "url": "git+https://github.com/adrianhdezm/sap-aicore-utils.git",
     "directory": "packages/sap-aicore-provider"
   },
   "keywords": [],
   "author": "Adrian Hernandez Mendez",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/adrianhdezm/sap-aicore-provider/issues"
+    "url": "https://github.com/adrianhdezm/sap-aicore-utils/issues"
   },
-  "homepage": "https://github.com/adrianhdezm/sap-aicore-provider#readme",
+  "homepage": "https://github.com/adrianhdezm/sap-aicore-utils/tree/main/packages/sap-aicore-provider#readme",
   "files": [
     "dist",
     "README.md",
