@@ -1,4 +1,4 @@
-# Mastra Example
+# Mastra Agents Example
 
 A simple example demonstrating how to use the SAP AI Core Provider with Mastra Agents.
 
@@ -27,7 +27,7 @@ A simple example demonstrating how to use the SAP AI Core Provider with Mastra A
 ## Running
 
 ```bash
-pnpm --filter mastra-example start
+pnpm --filter mastra-agents start
 ```
 
 This will run the example which generates a text response using an AI model through SAP AI Core.

@@ -1,8 +1,8 @@
 {
-  "name": "mastra-example",
+  "name": "mastra-agents",
   "private": true,
   "version": "0.0.0",
-  "description": "Mastra example using SAP AI Core Provider",
+  "description": "Mastra agents example using SAP AI Core Provider",
   "type": "module",
   "scripts": {
     "dev": "mastra dev",

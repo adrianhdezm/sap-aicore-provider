@@ -1,4 +1,4 @@
-# OpenAI Agents with SAP AI Core Provider Example
+# OpenAI Agents SDK Agents Example
 
 A simple example demonstrating how to use the SAP AI Core Provider with OpenAI Agents SDK.
 
