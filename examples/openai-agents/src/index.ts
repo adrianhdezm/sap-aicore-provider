@@ -18,7 +18,7 @@ async function main() {
     model: aisdk(sapAiCore('sap-aicore/gpt-4.1'))
   });
 
-  const result = await run(agent, 'Write a haiku about recursion in programming.');
+  const result = await run(agent, 'Explain how SAP AI Core helps enterprises adopt AI. List 3 key benefits.');
 
   console.log('Output:', result.finalOutput);
 }
