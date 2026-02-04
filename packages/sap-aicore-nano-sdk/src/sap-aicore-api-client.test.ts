@@ -1,6 +1,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
 import { SapAiCoreApiClient, type SapAiCoreParams } from './sap-aicore-api-client.js';
 
+// Helper to create a mock JWT token with a specific expiration time
+function createMockJwt(exp: number): string {
+  const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+  const payload = btoa(JSON.stringify({ exp }));
+  const signature = 'mock-signature';
+  return `${header}.${payload}.${signature}`;
+}
+
 describe('SapAiCoreApiClient', () => {
   const defaultParams: SapAiCoreParams = {
     clientId: 'test-client-id',
@@ -51,12 +59,13 @@ describe('SapAiCoreApiClient', () => {
 
   describe('getAccessToken', () => {
     it('should fetch a new access token', async () => {
-      mockFetch.mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 'new-token' }), { status: 200 }));
+      const mockToken = createMockJwt(Math.floor(Date.now() / 1000) + 3600);
+      mockFetch.mockResolvedValueOnce(new Response(JSON.stringify({ access_token: mockToken }), { status: 200 }));
 
       const client = new SapAiCoreApiClient(defaultParams);
       const token = await client.getAccessToken();
 
-      expect(token).toBe('new-token');
+      expect(token).toBe(mockToken);
       expect(mockFetch).toHaveBeenCalledTimes(1);
       expect(mockFetch).toHaveBeenCalledWith('https://auth.example.com/oauth/token?grant_type=client_credentials', {
         method: 'GET',
@@ -67,15 +76,16 @@ describe('SapAiCoreApiClient', () => {
     });
 
     it('should return cached token when not expired', async () => {
-      mockFetch.mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 'cached-token' }), { status: 200 }));
+      const mockToken = createMockJwt(Math.floor(Date.now() / 1000) + 3600);
+      mockFetch.mockResolvedValueOnce(new Response(JSON.stringify({ access_token: mockToken }), { status: 200 }));
 
       const client = new SapAiCoreApiClient(defaultParams);
 
       const token1 = await client.getAccessToken();
       const token2 = await client.getAccessToken();
 
-      expect(token1).toBe('cached-token');
-      expect(token2).toBe('cached-token');
+      expect(token1).toBe(mockToken);
+      expect(token2).toBe(mockToken);
       expect(mockFetch).toHaveBeenCalledTimes(1);
     });
 
@@ -84,20 +94,24 @@ describe('SapAiCoreApiClient', () => {
       const now = new Date('2024-01-01T00:00:00Z');
       vi.setSystemTime(now);
 
+      const nowSeconds = Math.floor(now.getTime() / 1000);
+      const firstToken = createMockJwt(nowSeconds + 3600); // Expires in 1 hour
+      const secondToken = createMockJwt(nowSeconds + 7200); // Expires in 2 hours
+
       mockFetch
-        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 'first-token' }), { status: 200 }))
-        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 'second-token' }), { status: 200 }));
+        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: firstToken }), { status: 200 }))
+        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: secondToken }), { status: 200 }));
 
       const client = new SapAiCoreApiClient(defaultParams);
 
       const token1 = await client.getAccessToken();
-      expect(token1).toBe('first-token');
+      expect(token1).toBe(firstToken);
 
-      // Advance time by 56 minutes (token expires after 55 minutes)
-      vi.advanceTimersByTime(56 * 60 * 1000);
+      // Advance time by 61 minutes (token expires after 60 minutes based on JWT exp)
+      vi.advanceTimersByTime(61 * 60 * 1000);
 
       const token2 = await client.getAccessToken();
-      expect(token2).toBe('second-token');
+      expect(token2).toBe(secondToken);
       expect(mockFetch).toHaveBeenCalledTimes(2);
     });
 
@@ -107,6 +121,41 @@ describe('SapAiCoreApiClient', () => {
       const client = new SapAiCoreApiClient(defaultParams);
 
       await expect(client.getAccessToken()).rejects.toThrow('Token fetch failed: 401 Unauthorized');
+    });
+
+    it('should throw error for invalid JWT token without payload', async () => {
+      mockFetch.mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 'invalid-token' }), { status: 200 }));
+
+      const client = new SapAiCoreApiClient(defaultParams);
+
+      await expect(client.getAccessToken()).rejects.toThrow('Invalid JWT token: missing payload');
+    });
+
+    it('should correctly parse exp claim from JWT and set expiration', async () => {
+      vi.useFakeTimers();
+      const now = new Date('2024-01-01T00:00:00Z');
+      vi.setSystemTime(now);
+
+      const expTimestamp = Math.floor(now.getTime() / 1000) + 1800; // 30 minutes from now
+      const mockToken = createMockJwt(expTimestamp);
+      mockFetch.mockResolvedValueOnce(new Response(JSON.stringify({ access_token: mockToken }), { status: 200 }));
+
+      const client = new SapAiCoreApiClient(defaultParams);
+      await client.getAccessToken();
+
+      // Advance time by 29 minutes - token should still be valid
+      vi.advanceTimersByTime(29 * 60 * 1000);
+      mockFetch.mockResolvedValueOnce(new Response(JSON.stringify({ access_token: createMockJwt(expTimestamp + 3600) }), { status: 200 }));
+
+      const cachedToken = await client.getAccessToken();
+      expect(cachedToken).toBe(mockToken);
+      expect(mockFetch).toHaveBeenCalledTimes(1); // Still using cached token
+
+      // Advance time by 2 more minutes (total 31 minutes) - token should be expired
+      vi.advanceTimersByTime(2 * 60 * 1000);
+
+      await client.getAccessToken();
+      expect(mockFetch).toHaveBeenCalledTimes(2); // New token fetched
     });
   });
 
@@ -137,8 +186,9 @@ describe('SapAiCoreApiClient', () => {
     };
 
     it('should fetch and return deployment URL for a model', async () => {
+      const mockToken = createMockJwt(Math.floor(Date.now() / 1000) + 3600);
       mockFetch
-        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 'test-token' }), { status: 200 }))
+        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: mockToken }), { status: 200 }))
         .mockResolvedValueOnce(new Response(JSON.stringify(mockDeploymentsResponse), { status: 200 }));
 
       const client = new SapAiCoreApiClient(defaultParams);
@@ -154,14 +204,15 @@ describe('SapAiCoreApiClient', () => {
         headers: {
           'Content-Type': 'application/json',
           'AI-Resource-Group': 'default',
-          Authorization: 'Bearer test-token'
+          Authorization: `Bearer ${mockToken}`
         }
       });
     });
 
     it('should return cached deployment URL on subsequent calls', async () => {
+      const mockToken = createMockJwt(Math.floor(Date.now() / 1000) + 3600);
       mockFetch
-        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 'test-token' }), { status: 200 }))
+        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: mockToken }), { status: 200 }))
         .mockResolvedValueOnce(new Response(JSON.stringify(mockDeploymentsResponse), { status: 200 }));
 
       const client = new SapAiCoreApiClient(defaultParams);
@@ -176,8 +227,9 @@ describe('SapAiCoreApiClient', () => {
     });
 
     it('should throw error when deployment fetch fails', async () => {
+      const mockToken = createMockJwt(Math.floor(Date.now() / 1000) + 3600);
       mockFetch
-        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 'test-token' }), { status: 200 }))
+        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: mockToken }), { status: 200 }))
         .mockResolvedValueOnce(new Response(null, { status: 500, statusText: 'Internal Server Error' }));
 
       const client = new SapAiCoreApiClient(defaultParams);
@@ -186,8 +238,9 @@ describe('SapAiCoreApiClient', () => {
     });
 
     it('should throw error when no deployment found for model', async () => {
+      const mockToken = createMockJwt(Math.floor(Date.now() / 1000) + 3600);
       mockFetch
-        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 'test-token' }), { status: 200 }))
+        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: mockToken }), { status: 200 }))
         .mockResolvedValueOnce(new Response(JSON.stringify({ resources: [] }), { status: 200 }));
 
       const client = new SapAiCoreApiClient(defaultParams);
@@ -213,8 +266,9 @@ describe('SapAiCoreApiClient', () => {
         ]
       };
 
+      const mockToken = createMockJwt(Math.floor(Date.now() / 1000) + 3600);
       mockFetch
-        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 'test-token' }), { status: 200 }))
+        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: mockToken }), { status: 200 }))
         .mockResolvedValueOnce(new Response(JSON.stringify(responseWithoutUrl), { status: 200 }));
 
       const client = new SapAiCoreApiClient(defaultParams);
@@ -223,8 +277,9 @@ describe('SapAiCoreApiClient', () => {
     });
 
     it('should use custom resourceGroup in headers', async () => {
+      const mockToken = createMockJwt(Math.floor(Date.now() / 1000) + 3600);
       mockFetch
-        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 'test-token' }), { status: 200 }))
+        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: mockToken }), { status: 200 }))
         .mockResolvedValueOnce(new Response(JSON.stringify(mockDeploymentsResponse), { status: 200 }));
 
       const client = new SapAiCoreApiClient({
@@ -239,8 +294,9 @@ describe('SapAiCoreApiClient', () => {
     });
 
     it('should cache different models separately', async () => {
+      const mockToken = createMockJwt(Math.floor(Date.now() / 1000) + 3600);
       mockFetch
-        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 'test-token' }), { status: 200 }))
+        .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: mockToken }), { status: 200 }))
         .mockResolvedValueOnce(new Response(JSON.stringify(mockDeploymentsResponse), { status: 200 }))
         .mockResolvedValueOnce(new Response(JSON.stringify(mockDeploymentsResponse), { status: 200 }));
 

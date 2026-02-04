@@ -54,7 +54,15 @@ export class SapAiCoreApiClient {
     }
     const data = (await response.json()) as { access_token: string };
     const accessToken = data.access_token;
-    const expiresAt = new Date(Date.now() + 55 * 60000).toISOString();
+
+    // Decode JWT to get expiration time from the 'exp' claim
+    const payloadBase64 = accessToken.split('.')[1];
+    if (!payloadBase64) {
+      throw new Error('Invalid JWT token: missing payload');
+    }
+
+    const payload = JSON.parse(atob(payloadBase64)) as { exp: number };
+    const expiresAt = new Date(payload.exp * 1000).toISOString();
 
     this.accessToken = accessToken;
     this.expiresAt = expiresAt;
