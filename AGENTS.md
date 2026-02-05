@@ -1,4 +1,4 @@
-# AGENTS.md - Project Contributor Guide
+# AGENTS.md - Guidelines for Agentic Coding in this Repository
 
 This file provides guidance to Code Agents such Claude Code (claude.ai/code) when working with code in this repository.
 
